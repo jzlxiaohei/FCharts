@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="./lib/jquery.js"></script>
+    <script src="./lib/hsData.js"></script>
+    <script src="./lib/async.js"></script>
+    <script src="/assets/FCharts.js"></script>
+</head>
+<body>
+
+    <div>
+        <canvas id="canvas" width="600" height="600" style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
+        <canvas id="canvas-event" width="600" height="600" style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
+    </div>
+
+    <script>
+        var start_date = new Date();
+        var parseDateToFormat = function(d){
+            var year = d.getFullYear()
+            var month = d.getMonth()+1
+            var day = d.getDate();
+            var hour =d.getHours();
+            var minute =d.getMinutes();
+
+            return {
+                year:year,
+                month:month<10 ?'0'+month : month,
+                day:day<10? '0'+day : day,
+                hour:hour<10? '0'+hour :hour,
+                minute: minute<10?'0'+minute : minute
+            }
+        }
+
+        var sd_obj = parseDateToFormat(start_date);
+        function keyValueInvert(kvObj){
+            var vkObj={}
+            for(var i in kvObj){
+                vkObj[kvObj[i]] = i;
+            }
+            return vkObj;
+        }
+
+//        function getMousePos(canvas, evt) {
+//            var rect = canvas.getBoundingClientRect();
+//            return {
+//                x: evt.clientX - rect.left,
+//                y: evt.clientY - rect.top
+//            };
+//        }
+    </script>
+
+    <script>
+
+        var prod_code='002175.SZ'
+        async.parallel({
+                    preClose: function (cb) {
+                        var real = new HsDataFactoryList.real({
+                            en_prod_code: prod_code,
+                            fields: 'preclose_px'
+                        }).onDataReady(function (e) {
+                                    var _m = keyValueInvert(e.data.snapshot.fields)
+                                    var preClose = e.data.snapshot[prod_code][_m['preclose_px']]
+                                    cb(null, preClose)
+                                }).init()
+                    },
+                    candle: function (cb) {
+                        var kline = new HsDataFactoryList.kline({
+                            get_type: 'offset',
+                            prod_code: prod_code,
+                            candle_period: 1,
+                            data_count:240
+                        }).onDataReady(function (e) {
+                                    var candle = e.data.candle;
+                                    cb(null, candle)
+                                }).init()
+                    }
+                },
+                function (err, results) {
+                    var candle = results.candle
+
+                    var preClose = results.preClose;
+
+                    var _m = keyValueInvert(candle.fields)
+
+
+                    var yData = [],xData=[]
+//                    candle['600570.SS'].forEach(function(cd){
+//                            yData.push( {
+//                                open: 100* ( cd[_m['open_px']]-preClose ) /preClose,
+//                                high: 100* ( cd[_m['high_px']]-preClose ) /preClose,
+//                                low:  100* ( cd[_m['low_px']] -preClose)/preClose,
+//                                close: 100*( cd[_m['close_px']]-preClose)/preClose
+//                            })
+//                            xData.push(cd[_m['min_time']])
+//
+//                    })
+
+                    candle[prod_code].forEach(function(cd){
+                        yData.push( {
+                            open:( cd[_m['open_px']] ) ,
+                            high : cd[_m['high_px']]  ,
+                            low :  cd[_m['low_px']]  ,
+                            close: cd[_m['close_px']]
+                        })
+                        xData.push(cd[_m['min_time']])
+
+                    })
+
+                    var chart  = new FCharts.Chart({
+                        ctx : document.getElementById('canvas').getContext('2d'),
+                        canvasEvent:document.getElementById('canvas-event'),
+                        canvasRect:[0,0,600,600],
+                        movable:true,
+                        scalable:true,
+                        xAxis:{
+                            itemWidth:6,
+                            range:[0,600],
+                            data:xData,
+                            gap:2
+                        },
+                        series:[{
+                            range:[20,380],
+                            data:yData,
+                            key:'1m_line',
+                            type:'candle',
+//                            axisType:'symmetry',
+//                            preClose:preClose,
+//                            niceTick:true
+                            tickCount:5,
+                            style:{
+                                candleWidth:2
+                            }
+                        },{
+                            range:[400,600],
+                            data:yData,
+                            key:'1m_line_1',
+                            type:'line',
+//                            axisType:'symmetry',
+//                            preClose:preClose,
+//                            niceTick:true
+                            tickCount:5,
+
+                        }]
+                    })
+                    chart.render();
+                    window.chart = chart;
+                }
+        )
+    </script>
+</body>
+</html>

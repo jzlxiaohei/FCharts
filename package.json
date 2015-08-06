@@ -1,0 +1,25 @@
+{
+  "name": "FCharts",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "test": "",
+    "start": ""
+  },
+  "author": "zilong",
+  "license": "MIT",
+  "dependencies": {
+    "babel": "^5.5.8",
+    "babel-core": "^5.8.3",
+    "babel-loader": "^5.3.2",
+    "babel-runtime": "^5.8.3",
+    "babelify": "^6.1.2",
+    "gulp": "^3.8.11",
+    "gulp-util": "^3.0.6",
+    "webpack": "^1.10.1",
+    "webpack-dev-server": "^1.10.1"
+  },
+  "devDependencies": {
+    "should": "^7.0.1"
+  }
+}
