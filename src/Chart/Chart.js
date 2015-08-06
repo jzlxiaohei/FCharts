@@ -57,7 +57,7 @@ class Chart{
                 eventCtx.beginPath();
                 eventCtx.strokeStyle='#000'
                 eventCtx.moveTo(e.x,0)
-                eventCtx.lineTo(e.x,400)
+                eventCtx.lineTo(e.x,600)
                 eventCtx.fillText(this.xBridge.getIndexByValue(e.x),10,10)
                 eventCtx.stroke()
 

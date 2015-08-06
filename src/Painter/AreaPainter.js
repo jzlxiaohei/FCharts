@@ -16,6 +16,8 @@ class AreaPainter extends PainterBase{
 
     draw(){
         var ctx = this.ctx;
+        var propName = this.propName;
+
         //TODO how to set start point and end point ???
         var yArr = this.yArr;
         var xArr = this.xArr;
