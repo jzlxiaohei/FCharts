@@ -1,13 +1,3 @@
-/**
- * setScale, setTranslation
- *
- * addFirst, addLast
- *
- * initXAxis
- *
- * getXAxis
- *
- * */
 
 import Utils from '../Utils/Utils.js'
 

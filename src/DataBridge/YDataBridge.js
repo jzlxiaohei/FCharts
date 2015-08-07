@@ -8,7 +8,6 @@ export class YDataBridge{
         this.axisType = options.axisType || 'default' //symmetry
         this.data = options.data||[] //原始数据 一般为[{open,high,low,close} ... ]
         this.range = options.range||[0,0]
-        //this._m = options.OhlcNameMap || _m  // 实际数据的属性名可能不是open,close等，需要提供一个映射，把`open`映射到实际数据的属性名
         this.viewRange = options.viewRange || [0,this.data.length]
         this.yAxis = new Array(this.data.length);
         this.isInit =  false;
@@ -47,7 +46,6 @@ export class YDataBridge{
         var max = -Infinity,
             min =  Infinity;
         var data = this.data;
-        //console.log(this.viewRange)
         for(var i = beginIdx;i<endIdx;i++){
             var dataItem = data[i]
             var localMax = dataItem['high'] ,
@@ -56,7 +54,6 @@ export class YDataBridge{
             if(localMax > max){max = localMax;}
 
             if(localMin < min){min = localMin}
-
 
         }
 
@@ -108,17 +105,11 @@ export class YDataBridge{
 
         let tranYFn = y =>{
             let ly = this.linearScale.scale(y);
-            if(y>this.domain[1] || y<this.domain[0]) {
-                //throw new Error(`${y}`)
-                //console.log(y)
-            }
-            //return ly
 
             return this.range[1] - ly + this.range[0];
         }
 
         var [beginIdx,endIdx] = this.viewRange;
-        //console.log(this.viewRange)
         this.yAxis = data.slice(beginIdx,endIdx).map(item=>{
             return {
                 open  : tranYFn( item[ 'open' ]),
@@ -167,8 +158,3 @@ export class YDataBridge{
         return this;
     }
 }
-
-
-
-
-//export default YDataBridge;
