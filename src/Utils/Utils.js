@@ -57,29 +57,12 @@ utils.Array={
 
 import LinearScale from './LinearScale.js'
 utils.Math={
-    //LineScale:function(domainX1,domainX2,rangeY1,rangeY2){
-    //    if(utils.Type.isArray(domainX1)){
-    //        var x1 = domainX1[0],
-    //            x2 = domainX1[1],
-    //            y1 = domainX2[0],
-    //            y2 = domainX2[1]
-    //    }else{
-    //        var x1 = domainX1,
-    //            x2 = domainX2,
-    //            y1 = rangeY1,
-    //            y2 = rangeY2
-    //    }
-    //    var yLen = y2-y1,
-    //        xLen = x2-x1;
-    //    return function(x){
-    //        return (x-x1)*yLen/xLen + y1;
-    //    }
-    //},
     LineScale:function(domain,range){
             return new LinearScale({domain:domain,range:range});
     },
+
+    //@see http://stackoverflow.com/questions/4228356/integer-division-in-javascript
     integerDivide(a,b){
-        //see http://stackoverflow.com/questions/4228356/integer-division-in-javascript
         return {
             div:Math.floor(a / b),
             rem:a % b
