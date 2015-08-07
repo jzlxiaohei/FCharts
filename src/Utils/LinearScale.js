@@ -33,7 +33,7 @@ function niceNum(rangeLen,round){
 
 export default class Linear {
 
-    constructor(options) {
+    constructor(options={}) {
         this.domain = options.domain || [0, 1];
         this.range = options.range || [0, 1];
     }
@@ -54,31 +54,27 @@ export default class Linear {
     }
 
     scale(value) {
-        //console.log(this.range)
         return this.linear(this.domain, this.range, value);
-        //var [x1,x2] = this.domain,
-        //    [y1,y2] = this.range;
-        //
-        //var yLen = y2-y1,
-        //    xLen = x2-x1;
-        //
-        //return (value-x1)*yLen/xLen + y1;
     }
 
     invert(value) {
         return this.linear(this.range, this.domain, value);
     }
 
-    ticks(count = 10,nice=false) {
+    ticks(count = 10,nice=false,useRange=true) {
         if(nice){
-            return this._niceTick(count)
+            return this._niceTick(count,useRange)
         }else{
-            return this._avgTick(count)
+            return this._avgTick(count,useRange)
         }
     }
 
-    _avgTick(count){
-        var [min,max] = this.range;
+    _avgTick(count,useRange){
+        if(useRange){
+            var [min,max] = this.range;
+        }else{
+            var [min,max] = this.domain;
+        }
         var step =  (max-min)/(count-1) ;
         if(step<=0){
             throw new Error('tick step <=0,it will lead endless loop')
@@ -94,9 +90,12 @@ export default class Linear {
      * @see http://stackoverflow.com/questions/8506881/nice-label-algorithm-for-charts-with-minimum-ticks
      *
      */
-
-    _niceTick(count){
-        var [min,max] = this.range;
+    _niceTick(count,useRange){
+        if(useRange){
+            var [min,max] = this.range;
+        }else{
+            var [min,max] = this.domain;
+        }
         var maxTicks = count;
 
         var niceRangeLen = niceNum(max-min,false);
