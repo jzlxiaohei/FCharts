@@ -72,6 +72,9 @@ export default class Linear {
     _avgTick(count,useRange){
         if(useRange){
             var [min,max] = this.range;
+            if(min > max){
+                [min,max] = [max,min];
+            }
         }else{
             var [min,max] = this.domain;
         }
@@ -93,6 +96,9 @@ export default class Linear {
     _niceTick(count,useRange){
         if(useRange){
             var [min,max] = this.range;
+            if(min > max){
+                [min,max] = [max,min];
+            }
         }else{
             var [min,max] = this.domain;
         }

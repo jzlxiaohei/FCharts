@@ -24,6 +24,8 @@ utils.Common = {
         }
         return target
     },
+    //[[k1,v1],[k2,v2]] =>{ k1:v1,k2:v2}
+    //k1,
     makeKvObj(kvArr){
         var kvObj = {}
         for(var i =0;i<kvArr.length;i++){
@@ -83,11 +85,14 @@ utils.Fn={
 
 var defaultBinarySearchCompareFunc=function(target,curElem) {
     if(curElem < target){
-        return 'less';
+        //return 'less';
+        return -1
     }else if(curElem > target){
-        return 'more';
+        //return 'more';
+        return 1
     }else{
-        return 'equal'
+        //return 'equal'
+        return 0
     }
 }
 
@@ -101,27 +106,16 @@ utils.Algorithms={
         while (minIndex <= maxIndex) {
             currentIndex = Math.floor( (minIndex + maxIndex) / 2 );
             currentElement = arr[currentIndex];
-
             //less more equal
             var lme = compareFunc(value,currentElement)
 
-            if(lme == 'less') {
+            if(lme < 0) {
                 minIndex = currentIndex+1;
-            }else if(lme =='more'){
+            }else if(lme > 0){
                 maxIndex = currentIndex-1;
             }else {
                 return currentIndex;
             }
-
-            //if (currentElement < value) {
-            //    minIndex = currentIndex + 1;
-            //}
-            //else if (currentElement > value) {
-            //    maxIndex = currentIndex - 1;
-            //}
-            //else {
-            //    return currentIndex;
-            //}
         }
         return -1;
     }

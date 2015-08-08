@@ -34,6 +34,28 @@ describe('LinearScale:',function(){
         should( linearScale.invert(100)).be.exactly(20)
     })
 
+
+    it("scale invert pair",function(){
+        var lineScale = new LinearScale({
+            domain:[10,20],
+            range:[10,100]
+        })
+        var lineScalePair = new LinearScale({
+            domain:[10,100],
+            range:[10,20]
+        })
+
+        var testNum = [10,18,23,45,78,96]
+
+        for(var i = 0;i<testNum.length;i++){
+            var num =testNum[i]
+            should(lineScale.scale(num)).be.exactly(
+                lineScalePair.invert(num)
+            )
+        }
+    })
+
+
     it('ticks without nice',function(){
         var linearScale = new LinearScale({
             domain:[10,20],

@@ -58,11 +58,11 @@ class XDataBridgeBase{
         var space = this.itemWidth+this.gap;
         return Utils.Algorithms.binarySearch(axisData,value,function(value,curElem){
             if(curElem >= value-space && curElem <= value){
-                return 'equal'
+                return 0
             }else if(curElem+space < value){
-                return 'less'
+                return -1
             }else{
-                return 'more'
+                return 1
             }
         })
     }
