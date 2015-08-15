@@ -20,7 +20,9 @@ class Chart{
         this.seriesOptions = options.series || [];
         this.xAxisOptions = options.xAxis;
 
-        this.layout = new Layout();
+        this.layout = new Layout({
+            ctx:this.ctx
+        });
 
         this.canvasEvent = options.canvasEvent;
         this.movable = options.movable || false;
@@ -65,12 +67,12 @@ class Chart{
                 var info = this.layout.getInfoByX(x);
 
                 eventCtx.font='18px'
-                eventCtx.fillText(info.x+'   '+info['1m_line'].close,100,100)
+                eventCtx.fillText(info.x+'   '+info['1m_line'].close_px,100,100)
 
                 this._curX = e.x;
                 if(this._dragging){
                     this.setTranslation(this._curX-this._lastX)
-                    this.reRender()
+                    this.render()
                 }
                 this._lastX = this._curX
             }
@@ -82,7 +84,7 @@ class Chart{
                 var scale = delta > 0 ? 1.1 : 1 / 1.1;
 
                 this.setScale(scale, getMousePos(canvasEvent,e).x)
-                this.reRender()
+                this.render()
             }
         }
     }
@@ -94,6 +96,7 @@ class Chart{
         }else{
             this.xBridge = XBridgeFactory('itemWidth',xOptions)
         }
+        this.xBridge.buildAxis()
         this.layout.setXBridge(this.xBridge)
         return this;
     }
@@ -115,33 +118,26 @@ class Chart{
 
         let painterType = sOpt.type;
 
-        //var options = {
-        //    range : sOpt.range,
-        //    data : sOpt.data,
-        //    axisType:sOpt.axisType
-        //}
 
         if(!sOpt.bridgeType){
             sOpt.bridgeType = Constant.YBridge.OHLC;
         }
         let yBridge = YBridgeFactory(sOpt.bridgeType,sOpt)
 
-        let painter = PainterFactory(painterType,{
-            ctx:this.ctx,
-            style:sOpt.style
-        })
-        this.layout.addComponent(sOpt.key,painter,yBridge)
+        this.layout.addComponent(sOpt.key,painterType,yBridge)
     }
 
     render(){
+        let [x,y,w,h] = this.canvasRect
+        this.ctx.clearRect(x,y,w,h)
         this.layout.render();
     }
 
-    reRender(){
-        let [x,y,w,h] = this.canvasRect
-        this.ctx.clearRect(x,y,w,h)
-        this.render()
-    }
+    //reRender(){
+    //    let [x,y,w,h] = this.canvasRect
+    //    this.ctx.clearRect(x,y,w,h)
+    //    this.render()
+    //}
 
     setScale(scale,value){
         this.layout.setScale(scale,value);

@@ -1,12 +1,13 @@
-import {YDataBridge,YDataBridgeWidthPreClose} from '../DataBridge/YDataBridge.js'
+//import {YDataBridge,YDataBridgeWidthPreClose} from '../DataBridge/YDataBridge.js'
+import {YDataBridge} from '../DataBridge/YDataBridge.js'
 
 import Constant from '../Constant/Constant.js'
 import Utils from '../Utils/Utils.js'
 
 
 var kvArr =[
-    [Constant.YBridge.OHLC, YDataBridge],
-    [Constant.YBridge.OHLC_PRECLOSE, YDataBridgeWidthPreClose]
+    [Constant.YBridge.OHLC, YDataBridge]
+    //[Constant.YBridge.OHLC_PRECLOSE, YDataBridgeWidthPreClose]
 ]
 
 const FactoryMap = Utils.Common.makeKvObj(kvArr);

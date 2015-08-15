@@ -6,6 +6,7 @@ class DrawComponent {
         this.yBridge = options.yBridge;
         this.xBridge = options.xBridge;
         this.style = options.style;
+        this.gridOn = options.gridOn || false;
     }
 
     setPainter(painter) {
@@ -50,14 +51,14 @@ class DrawComponent {
     render() {
         var xAxis = this.xBridge.getXAxis();
 
-        this.yBridge.setViewRange(this.xBridge.getViewRange())
-        var yAxis = this.yBridge.getYAxis(),
+        this.yBridge.setViewRange(this.xBridge.getViewRange());
+
+        let yAxis = this.yBridge.getYAxis(),
             style = this.style||{};
 
 
         //TODO add CandleDrawComponent to do this issue
-        style.candleWidth = this.xBridge.itemWidth;
-
+        style.itemWidth = this.xBridge.getItemWidth();
 
         this.painter
             .setYAxis(yAxis)

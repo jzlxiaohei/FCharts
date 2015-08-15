@@ -11,6 +11,12 @@ utils.Type ={
     isFunction(fn){return toString.call(fn) == '[object Function]'}
 }
 
+utils.String={
+    capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+}
+
 utils.Common = {
     merge(target,source,isOverwrite){
         for(var i in source){
@@ -33,6 +39,31 @@ utils.Common = {
             kvObj[kv[0]] = kv[1];
         }
         return kvObj;
+    },
+
+    invertKv(kvObj){
+        var vkObj={}
+        for(var i in kvObj){
+            vkObj[kvObj[i]] = i
+        }
+        return vkObj;
+    },
+
+    generateGetterSetter(obj,properties){
+        for(var i in properties){
+            var p = utils.String.capitalizeFirstLetter(i);
+            var v = properties[i];
+            (function(prop,value) {
+                obj[prop] = value;
+                obj['get' + prop] = function () {
+                    return obj[prop];
+                }
+                obj['set' + prop] = function(v){
+                    obj[prop] = v;
+                    return obj;
+                }
+            })(p,v)
+        }
     }
 }
 
@@ -74,7 +105,38 @@ utils.Math={
 
 
 utils.Canvas={
+    fillTextCenter(ctx,text,x,y){
+        var textWidth =  ctx.measureText(this.textFormat).width;
+        ctx.fillText(text,x-textWidth/2,y)
+        return textWidth
+    },
+    wrapText(context, text, x, y, maxWidth, lineHeight) {
+        var cars = text.split("\n");
 
+        for (var ii = 0; ii < cars.length; ii++) {
+
+            var line = "";
+            var words = cars[ii].split(" ");
+
+            for (var n = 0; n < words.length; n++) {
+                var testLine = line + words[n] + " ";
+                var metrics = context.measureText(testLine);
+                var testWidth = metrics.width;
+
+                if (testWidth > maxWidth) {
+                    context.fillText(line, x, y);
+                    line = words[n] + " ";
+                    y += lineHeight;
+                }
+                else {
+                    line = testLine;
+                }
+            }
+
+            context.fillText(line, x, y);
+            y += lineHeight;
+        }
+    }
 }
 
 

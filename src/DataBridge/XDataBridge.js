@@ -8,7 +8,7 @@ class XDataBridgeBase{
         this.gap = options.gap ||0;
         this.direction = options.direction || 'end'
         this.xAxis = new Array(this.data.length);
-        this.scaleRange = options.scaleRange || [0.01,50]
+        this.scaleRange = options.scaleRange || [0.01,5]
         this.scale = 1;
         this.isInit = false;
 
@@ -71,7 +71,6 @@ class XDataBridgeBase{
     getXAxis(){
         if(!this.isInit){
             this.buildAxis();
-            this.isInit = true;
         }
         var [beginIdx,endIdx] = this.viewRange
         return this.xAxis.slice(beginIdx,endIdx);
@@ -83,6 +82,7 @@ class XDataBridgeBase{
 
     buildAxis(){
         this.initItemWidth();
+
         this._originItemWidth = this.itemWidth;
         var range = this.range
         var begin = range[0],
@@ -91,6 +91,7 @@ class XDataBridgeBase{
         var data = this.data;
 
         if(!this.isInit) {
+            this.isInit = true;
             if (this.displayCount < data.length && this.direction == 'end') {
                 offset = (data.length - this.displayCount) * space
             }
@@ -107,23 +108,47 @@ class XDataBridgeBase{
         return this;
     }
 
+
+
     getTicks(){
-        var tickInfo = Utils.Math.LineScale(this.range,this.range)
-            .ticks(this.tickCount,this.ncieTick)
+        var data = this.data,
+            xAxis = this.xAxis
+        if(!this.ticks){
 
-        var start = tickInfo.start,
-            end   = tickInfo.end,
-            step  = tickInfo.step;
+            var lineScale = Utils.Math.LineScale([data[0],data[data.length-1]],
+                [xAxis[0],xAxis[xAxis.length-1]]);
 
-        var ticks =[];
-        var data = this;data
-        for(var i = start;i<=end;i+=step){
-            var index = this.getIndexByValue(i);
-            ticks.push({
-                domainValue:data[index],
-                rangeValue:i
-            })
+            var tickInfo = lineScale.ticks(this.tickCount,this.ncieTick,false)
+
+            var start = tickInfo.start,
+                end   = tickInfo.end,
+                step  = tickInfo.step;
+
+            var ticks =[];
+            for(var i = start;i<=end;i+=step){
+                var index = this.getIndexByValue(lineScale.scale(i));
+                ticks.push({
+                    domainValue:data[index],
+                    rangeValue:xAxis[index],
+                    //rangeValue: lineScale.scale(i),
+                    index:index
+                })
+            }
+            this.ticks = ticks;
+        }else{
+            for(var i in this.ticks){
+                var tick = this.ticks[i]
+                var index =tick.index;
+                tick.domainValue = data[index]
+                tick.rangeValue = xAxis[index]
+                //var rangeValue = xAxis[index];
+                //if(rangeValue> this.range[1] || rangeValue<this.range[0]){
+                //    continue;
+                //}
+            }
         }
+
+        return this.ticks;
     }
 
     _updateXAxis(fn){
@@ -146,12 +171,20 @@ class XDataBridgeBase{
     }
 
     getData(){
+        return this.data;
+    }
+
+    getViewData(){
         var [beginIdx,endIdx] = this.viewRange;
         return this.data.slice(beginIdx,endIdx)
     }
 
     getViewRange(){
         return this.viewRange;
+    }
+
+    getRange(){
+        return this.range
     }
 
     setScale(factor,val){

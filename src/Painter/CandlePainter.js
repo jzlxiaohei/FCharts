@@ -1,15 +1,15 @@
 import PainterBase from './PainterBase.js'
 
 class CandlePainter extends PainterBase{
-    constructor(opt){
-        super(opt);
+    constructor(options={}){
+        super(options);
     }
 
     draw(){
         var ctx = this.ctx;
         var xArr = this.xArr;
         var yArr = this.yArr;
-        var width = this.style.candleWidth || 6;
+        var itemWidth = this.style.itemWidth|| 6;
         //console.log(this.style)
         for(var i = 0;i<yArr.length;i++){
             var d = yArr[i]
@@ -19,7 +19,7 @@ class CandlePainter extends PainterBase{
                 high = d.high,
                 low = d.low
 
-            var x2 = x1 + width
+            var x2 = x1 + itemWidth
             var midX = (x1+x2)/2
 
             //画矩形

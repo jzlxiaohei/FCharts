@@ -2,7 +2,9 @@ const Constant = {
     Painter:{
         LINE:'line',
         CANDLE:'candle',
-        AREA:'area'
+        AREA:'area',
+        X_GRID:'xGrid',
+        Y_GRID:'yGrid'
     },
     YBridge:{
         'OHLC':'ohlc',
@@ -11,6 +13,11 @@ const Constant = {
     XBridge:{
         'FIXED_COUNT':'fixedCount',
         'ITEM_WIDTH':'itemWidth'
+    },
+    Component:{
+        LINE:'line',
+        CANDLE:'candle',
+        AREA:'area'
     }
 }
 

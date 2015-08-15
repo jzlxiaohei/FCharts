@@ -83,8 +83,8 @@ export default class Linear {
             throw new Error('tick step <=0,it will lead endless loop')
         }
         return{
-            start:min,
-            end:max,
+            start:Math.floor(min*step/step),
+            end:Math.ceil(max*step/step),
             step:step
         }
     }

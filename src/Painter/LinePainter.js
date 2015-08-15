@@ -1,7 +1,7 @@
 import PainterBase from './PainterBase.js'
 
 class LinePainter extends PainterBase{
-    constructor(opt){
+    constructor(opt={}){
         super(opt)
         this.propName = opt.propName || 'close'
     }
@@ -13,13 +13,25 @@ class LinePainter extends PainterBase{
         if(xArr.length ===0 || yArr.length===0){
             throw new Error('xArr and yArr should not be empty')
         }
-        var propName = this.propName;
-        ctx.moveTo(xArr[0],yArr[0][propName])
-        for(var i = 1;i<yArr.length && i<xArr.length;i++){
-            var y = yArr[i][propName]
-            var x = xArr[i]
-            ctx.lineTo(x,y)
+        if(typeof yArr[0] ==='object'){
+            var propName = this.propName;
+            ctx.moveTo(xArr[0],yArr[0][propName])
+            var len = Math.min(yArr.length,xArr.length)
+            for(var i = 1;i<len;i++){
+                var y = yArr[i][propName]
+                var x = xArr[i]
+                ctx.lineTo(x,y)
+            }
+        }else{
+            ctx.moveTo(xArr[0],yArr[0])
+            var len = Math.min(yArr.length,xArr.length)
+            for(var i = 1;i<len;i++){
+                var y = yArr[i]
+                var x = xArr[i]
+                ctx.lineTo(x,y)
+            }
         }
+
     }
 
     afterDraw(){

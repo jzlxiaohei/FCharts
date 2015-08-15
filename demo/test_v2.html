@@ -33,6 +33,19 @@
             }
         }
 
+        var dateStr2Obj=function(str){
+            //201508130932
+            str = str+''
+            var year = +str.substring(0,4),
+                mouth = +str.substring(4,6),
+                    day = +str.substring(6,8),
+                    hour = +str.substring(8,10),
+                    minute = +str.substring(10,12)
+
+
+            return new Date(year,mouth-1,day,hour,minute).getTime()
+        }
+
         var sd_obj = parseDateToFormat(start_date);
         function keyValueInvert(kvObj){
             var vkObj={}
@@ -97,16 +110,21 @@
 //
 //                    })
 
+                    var yValueData=[]
                     candle[prod_code].forEach(function(cd){
                         yData.push( {
-                            open:( cd[_m['open_px']] ) ,
-                            high : cd[_m['high_px']]  ,
-                            low :  cd[_m['low_px']]  ,
-                            close: cd[_m['close_px']]
+                            open_px:( cd[_m['open_px']] ) ,
+                            high_px : cd[_m['high_px']]  ,
+                            low_px :  cd[_m['low_px']]  ,
+                            close_px: cd[_m['close_px']]
                         })
-                        xData.push(cd[_m['min_time']])
+                        yValueData.push(cd[_m['close_px']])
+//                        xData.push(cd[_m['min_time']])
+                        xData.push(dateStr2Obj(cd[_m['min_time']]))
 
                     })
+
+
 
                     var chart  = new FCharts.Chart({
                         ctx : document.getElementById('canvas').getContext('2d'),
@@ -128,20 +146,36 @@
 //                            axisType:'symmetry',
 //                            preClose:preClose,
 //                            niceTick:true
-                            tickCount:5,
+                            ohlcNameMap:{
+                                open:"open_px",
+                                close:"close_px",
+                                high : "high_px",
+                                low:"low_px"
+                            },
+                            tickCount:10,
                             style:{
-                                candleWidth:2
+                                up:{
+
+                                },
+                                down:{
+
+                                }
                             }
                         },{
                             range:[400,600],
-                            data:yData,
+                            data:yValueData,
                             key:'1m_line_1',
+//                            ohlcNameMap:{
+//                                open:"open_px",
+//                                close:"close_px",
+//                                high : "high_px",
+//                                low:"low_px"
+//                            },
                             type:'line',
 //                            axisType:'symmetry',
 //                            preClose:preClose,
 //                            niceTick:true
-                            tickCount:5,
-
+                            tickCount:5
                         }]
                     })
                     chart.render();

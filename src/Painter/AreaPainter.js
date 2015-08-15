@@ -9,25 +9,38 @@ import PainterBase from './PainterBase.js'
 * */
 
 class AreaPainter extends PainterBase{
-    constructor(opt){
+    constructor(opt={}){
         super(opt);
         this.propName = opt.propName || 'close'
     }
 
     draw(){
         var ctx = this.ctx;
-        var propName = this.propName;
-
-        //TODO how to set start point and end point ???
-        var yArr = this.yArr;
         var xArr = this.xArr;
-        ctx.moveTo(xArr[0],yArr[0])
+        var yArr = this.yArr;
+        if(xArr.length ===0 || yArr.length===0){
+            throw new Error('xArr and yArr should not be empty')
+        }
+        var propName = this.propName;
+        ctx.moveTo(xArr[0],yArr[0][propName])
 
-        for(var i = 1;i<xArr.length && i<yArr.length;i++){
+        var len = Math.min(yArr.length,xArr.length)
+        for(var i = 1;i<len;i++){
             var y = yArr[i][propName]
             var x = xArr[i]
             ctx.lineTo(x,y)
         }
+        this.setStyle({
+            brushType:'stroke'
+        })
+        this.afterDraw();
+
+        ctx.lineTo(xArr[len-1],600)
+        ctx.lineTo(xArr[0],600)
+
+        this.setStyle({
+            brushType:'fill'
+        })
     }
 }
 
