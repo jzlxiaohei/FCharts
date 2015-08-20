@@ -28,7 +28,7 @@ export class YDataBridge{
         this.data  = options.data||[] //原始数据 一般为[{open,high,low,close} ... ]
         this.range = options.range||[0,0]
 
-        this.viewRange = options.viewRange || [0,this.data.length]
+        this.viewDomain = options.viewDomain || [0,this.data.length]
         this.yAxis = new Array(this.data.length);
         this.tickCount = options.tickCount;
         this.niceTick = options.niceTick || false;
@@ -76,7 +76,7 @@ export class YDataBridge{
 
     _calcMaxMin(){
 
-        var [beginIdx,endIdx] = this.viewRange;
+        var [beginIdx,endIdx] = this.viewDomain;
 
         var max = -Infinity,
             min =  Infinity;
@@ -136,7 +136,7 @@ export class YDataBridge{
             }
         }
 
-        var [beginIdx,endIdx] = this.viewRange;
+        var [beginIdx,endIdx] = this.viewDomain;
         this.yAxis = data.slice(beginIdx,endIdx).map(item=>{
             return tranYFn(item)
         })
@@ -144,11 +144,11 @@ export class YDataBridge{
         return this;
     }
 
-    setViewRange(viewRange,forceCalculate){
+    setViewDomain(viewDomain,forceCalculate){
         if(forceCalculate===undefined){
             forceCalculate = true;
         }
-        this.viewRange = viewRange;
+        this.viewDomain = viewDomain;
         if(forceCalculate){
             this.buildAxis()
         }
@@ -156,29 +156,29 @@ export class YDataBridge{
     }
 
     getTicks(){
-        var lineScale =  Utils.Math.LineScale(this.domain)
-        var tickInfo = this.linearScale.ticks(this.tickCount,this.niceTick,false);
-        var start = tickInfo.start,
-            end   = tickInfo.end,
-            step  = tickInfo.step;
-        var ticks = []
-        for(var i = start;i<=end;i+=step){
-            var rangeValue =this.linearScale.scale(i)
-            if(rangeValue > this.range[1] || this.rangeValue<this.range[0]){
+        //var lineScale =  Utils.Math.LineScale(this.domain)
+        var ticks = this.linearScale.ticks(this.tickCount,this.niceTick);
+        var rangeLen = this.range[1] + this.range[0]
+
+        var newTicks = []
+        for(var i = 0;i<ticks.length;i++){
+            var domain = ticks[i]
+            var rangeValue = rangeLen - this.linearScale.scale(domain)
+            if(rangeValue > this.range[1] || rangeValue<this.range[0]){
                 continue;
             }
-            ticks.push({
+            newTicks.push({
                 //rangeValue:i,
                 //domainValue:this.linearScale.invert(i)
-                domainValue: i,
+                domainValue: domain,
                 rangeValue:rangeValue
             })
         }
-        return ticks
+        return newTicks
     }
 
     getViewData(){
-        var [beginIdx,endIdx] = this.viewRange;
+        var [beginIdx,endIdx] = this.viewDomain;
         return this.data.slice(beginIdx,endIdx)
     }
 
@@ -186,7 +186,7 @@ export class YDataBridge{
         //if(origin){
         //    return this.data;
         //}else{
-        //    var [beginIdx,endIdx] = this.viewRange;
+        //    var [beginIdx,endIdx] = this.viewDomain;
         //    return this.data.slice(beginIdx,endIdx)
         //}
         return this.data;
@@ -203,8 +203,8 @@ export class YDataBridge{
         return this.yAxis;
     }
 
-    getViewRange(){
-        return this.viewRange;
+    getViewDomain(){
+        return this.viewDomain;
     }
 
     getDomain(){

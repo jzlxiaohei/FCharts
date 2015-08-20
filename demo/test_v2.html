@@ -43,7 +43,7 @@
                     minute = +str.substring(10,12)
 
 
-            return new Date(year,mouth-1,day,hour,minute).getTime()
+            return new Date(year,mouth-1,day,hour,minute)
         }
 
         var sd_obj = parseDateToFormat(start_date);
@@ -66,7 +66,8 @@
 
     <script>
 
-        var prod_code='002175.SZ'
+        /*
+        var prod_code='600570.SS'
         async.parallel({
                     preClose: function (cb) {
                         var real = new HsDataFactoryList.real({
@@ -110,7 +111,7 @@
 //
 //                    })
 
-                    var yValueData=[]
+                    var yValueData=[],barData=[]
                     candle[prod_code].forEach(function(cd){
                         yData.push( {
                             open_px:( cd[_m['open_px']] ) ,
@@ -121,67 +122,184 @@
                         yValueData.push(cd[_m['close_px']])
 //                        xData.push(cd[_m['min_time']])
                         xData.push(dateStr2Obj(cd[_m['min_time']]))
-
+                        barData.push(cd[_m['business_amount']])
                     })
 
 
-
-                    var chart  = new FCharts.Chart({
-                        ctx : document.getElementById('canvas').getContext('2d'),
-                        canvasEvent:document.getElementById('canvas-event'),
-                        canvasRect:[0,0,600,600],
-                        movable:true,
-                        scalable:true,
-                        xAxis:{
-                            itemWidth:6,
-                            range:[0,600],
-                            data:xData,
-                            gap:2
+                    var chart = new FCharts.Chart({
+                        ctx: document.getElementById('canvas').getContext('2d'),
+                        eventCanvas: document.getElementById('canvas-event'),
+                        canvasRect: [0, 0, 600, 600],
+                        movable: true,
+                        scalable: true,
+                        xAxis: {
+                            itemWidth: 6,
+                            range: [0, 600],
+                            data: xData,
+                            gap: 2
                         },
-                        series:[{
-                            range:[20,380],
-                            data:yData,
-                            key:'1m_line',
-                            type:'candle',
-//                            axisType:'symmetry',
-//                            preClose:preClose,
-//                            niceTick:true
-                            ohlcNameMap:{
-                                open:"open_px",
-                                close:"close_px",
-                                high : "high_px",
-                                low:"low_px"
+                        tips:function(item){
+                            var x = item.x,
+                                    y = item['1m_line'];
+                            return x.getHours()+':'+ x.getMinutes() + '\n'+
+                                            'open:'+ y.open_px + '\n'+
+                                            'close:'+ y.close_px + '\n'
+                        },
+                        series: [{
+                            range: [20, 380],
+                            data: yData,
+                            key: '1m_line',
+                            type: 'candle',
+                            //                            axisType:'symmetry',
+                            //                            preClose:preClose,
+                            //                            niceTick:true
+                            ohlcNameMap: {
+                                open: "open_px",
+                                close: "close_px",
+                                high: "high_px",
+                                low: "low_px"
                             },
-                            tickCount:10,
-                            style:{
-                                up:{
-
-                                },
-                                down:{
-
-                                }
+                            tickCount: 10,
+                            niceTick:true,
+                            gridColor: '#a9a9a9',
+                            style: {
+                                up: {},
+                                down: {}
+                            },
+                            yGridOn:true,
+                            xGridOn:true,
+                            xTextFormat: function (item) {
+                                return item.getHours() + '时:' + item.getMinutes() + '分';
+                            },
+                            yTextFormat: function (item) {
+                                return item.toFixed(2)
                             }
-                        },{
+                        },
+//                            {
+//                            range: [400, 600],
+//                            data: yValueData,
+//                            key: '1m_line_1',
+//                            type: 'line',
+//                            tickCount: 5,
+//                            gridColor: '#a9a9a9'
+//                        },
+                            {
                             range:[400,600],
-                            data:yValueData,
-                            key:'1m_line_1',
-//                            ohlcNameMap:{
-//                                open:"open_px",
-//                                close:"close_px",
-//                                high : "high_px",
-//                                low:"low_px"
-//                            },
-                            type:'line',
-//                            axisType:'symmetry',
-//                            preClose:preClose,
-//                            niceTick:true
-                            tickCount:5
+                            key:'1m_bar',
+                            type:'bar',
+                            data:barData,
+                                yGridOn:true,
+                                yGridLine:false,
+                                tickCount:5,
+                            yTextFormat: function (item) {
+                                if(item>10000){
+                                    var num = (item/10000)>>0
+                                    return num+'万'
+                                }
+                                return item>>0
+                            }
                         }]
                     })
                     chart.render();
                     window.chart = chart;
                 }
         )
+        */
+    </script>
+    <script src="mockData2.js"></script>
+    <script>
+
+        var prod_code='600570.SS'
+
+        var candle = mockData.data.candle
+
+
+        var _m = keyValueInvert(candle.fields)
+
+
+        var yData = [],xData=[]
+
+
+        var yValueData=[],barData=[]
+        candle[prod_code].forEach(function(cd){
+            yData.push( {
+                open_px:( cd[_m['open_px']] ) ,
+                high_px : cd[_m['high_px']]  ,
+                low_px :  cd[_m['low_px']]  ,
+                close_px: cd[_m['close_px']]
+            })
+            yValueData.push(cd[_m['close_px']])
+            xData.push(dateStr2Obj(cd[_m['min_time']]))
+            barData.push(cd[_m['business_amount']])
+        })
+
+
+        var chart = new FCharts.Chart({
+            ctx: document.getElementById('canvas').getContext('2d'),
+            eventCanvas: document.getElementById('canvas-event'),
+            canvasRect: [0, 0, 600, 600],
+            movable: true,
+            scalable: true,
+            xAxis: {
+                itemWidth: 6,
+                range: [0, 600],
+                data: xData,
+                gap: 2
+            },
+            tips:function(item){
+                var x = item.x,
+                        y = item['1m_line'];
+                return x.getHours()+':'+ x.getMinutes() + '\n'+
+                        'open:'+ y.open_px + '\n'+
+                        'close:'+ y.close_px + '\n'
+            },
+            series: [{
+                range: [20, 380],
+                data: yData,
+                key: '1m_line',
+                type: 'candle',
+                ohlcNameMap: {
+                    open: "open_px",
+                    close: "close_px",
+                    high: "high_px",
+                    low: "low_px"
+                },
+                tickCount: 10,
+                niceTick:true,
+                gridColor: '#a9a9a9',
+                style: {
+                    up: {},
+                    down: {}
+                },
+                yGridOn:true,
+                xGridOn:true,
+                xTextFormat: function (item) {
+                    return item.getHours() + '时:' + item.getMinutes() + '分';
+                },
+                yTextFormat: function (item) {
+                    return item.toFixed(2)
+                }
+            },
+                {
+                    range:[400,600],
+                    key:'1m_bar',
+                    type:'bar',
+                    data:barData,
+                    yGridOn:true,
+                    yGridLine:false,
+                    tickCount:5,
+                    yTextFormat: function (item) {
+                        if(item>1000000){
+                            var num = (item/1000000)>>0
+                            return num+'万手'
+                        }
+                        return (item/100)>>0
+                    },
+                    gridColor: '#a9a9a9'
+                }]
+        })
+        chart.render();
+
     </script>
 </body>
 </html>

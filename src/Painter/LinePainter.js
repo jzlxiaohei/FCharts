@@ -3,34 +3,34 @@ import PainterBase from './PainterBase.js'
 class LinePainter extends PainterBase{
     constructor(opt={}){
         super(opt)
-        this.propName = opt.propName || 'close'
+        //this.propName = opt.propName || 'close'
     }
 
     draw(){
         var ctx = this.ctx;
-        var xArr = this.xArr;
-        var yArr = this.yArr;
-        if(xArr.length ===0 || yArr.length===0){
-            throw new Error('xArr and yArr should not be empty')
+        var xAxis = this.xAxis;
+        var yAxis = this.yAxis;
+        if(xAxis.length ===0 || yAxis.length===0){
+            throw new Error('xAxis and yAxis should not be empty')
         }
-        if(typeof yArr[0] ==='object'){
-            var propName = this.propName;
-            ctx.moveTo(xArr[0],yArr[0][propName])
-            var len = Math.min(yArr.length,xArr.length)
+        //if(typeof yAxis[0] ==='object'){
+        //    var propName = this.propName;
+        //    ctx.moveTo(xAxis[0],yAxis[0][propName])
+        //    var len = Math.min(yAxis.length,xAxis.length)
+        //    for(var i = 1;i<len;i++){
+        //        var y = yAxis[i][propName]
+        //        var x = xAxis[i]
+        //        ctx.lineTo(x,y)
+        //    }
+        //}else{
+            ctx.moveTo(xAxis[0],yAxis[0])
+            var len = Math.min(yAxis.length,xAxis.length)
             for(var i = 1;i<len;i++){
-                var y = yArr[i][propName]
-                var x = xArr[i]
+                var y = yAxis[i]
+                var x = xAxis[i]
                 ctx.lineTo(x,y)
             }
-        }else{
-            ctx.moveTo(xArr[0],yArr[0])
-            var len = Math.min(yArr.length,xArr.length)
-            for(var i = 1;i<len;i++){
-                var y = yArr[i]
-                var x = xArr[i]
-                ctx.lineTo(x,y)
-            }
-        }
+        //}
 
     }
 

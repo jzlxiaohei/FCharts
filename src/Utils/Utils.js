@@ -1,6 +1,7 @@
-/**
- * Created by zilong on 6/23/15.
- */
+import LinearScale from './LinearScale.js'
+import TimeScale from './TimeScale.js'
+
+
 var toString = Object.prototype.toString;
 
 var utils = {
@@ -88,12 +89,17 @@ utils.Array={
     }
 }
 
-import LinearScale from './LinearScale.js'
+
 utils.Math={
     LineScale:function(domain,range){
-            return new LinearScale({domain:domain,range:range});
+        return new LinearScale({domain:domain,range:range});
     },
-
+    TimeScale:function(domain,range){
+        return new TimeScale({
+            domain:domain,
+            range:range
+        });
+    },
     //@see http://stackoverflow.com/questions/4228356/integer-division-in-javascript
     integerDivide(a,b){
         return {

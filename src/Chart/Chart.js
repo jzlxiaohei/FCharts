@@ -1,10 +1,12 @@
-import Layout from '../Layout/Layout.js'
-import PainterFactory from '../Factory/PainterFactory.js'
+//import Layout from '../Layout/Layout.js'
+import PainterFactory from '../Painter/PainterFactory.js'
 import YBridgeFactory from '../Factory/YBridgeFactory.js'
 import XBridgeFactory from '../Factory/XBridgeFactory.js'
 
-import Constant from '../Constant/Constant.js'
+import ComponentFactory from '../DrawComponent/ComponentFactory.js'
 
+import Constant from '../Constant/Constant.js'
+import Utils from '../Utils/Utils.js'
 function getMousePos(canvas, evt) {
     var rect = canvas.getBoundingClientRect();
     return {
@@ -20,17 +22,26 @@ class Chart{
         this.seriesOptions = options.series || [];
         this.xAxisOptions = options.xAxis;
 
-        this.layout = new Layout({
-            ctx:this.ctx
-        });
+        //this.layout = new Layout({
+        //    ctx:this.ctx
+        //});
 
-        this.canvasEvent = options.canvasEvent;
+        this.eventCanvas = options.eventCanvas;
         this.movable = options.movable || false;
         this.scalable =  options.scalable || false;
 
+        this.componentList = {}
+        this.tips = options.tips;
         this.init();
     }
 
+    setCtx(ctx){
+        this.ctx = ctx;
+        for(var i in this.componentList){
+            this.componentList[i].setCtx(ctx);
+        }
+        return this;
+    }
 
     init(){
         this._initXAxis()
@@ -39,35 +50,44 @@ class Chart{
     }
 
     _initEvent(){
+        if(!this.eventCanvas){
+            console.warn('eventCanvas not set')
+        }
         if(this.movable){
             this._dragging = false;
             this._lastX;
             this._curX;
-            var canvasEvent = this.canvasEvent
-            canvasEvent.onmousedown= e => {
+            var eventCanvas = this.eventCanvas
+            eventCanvas.onmousedown= e => {
                 this._dragging = true;
                 this._lastX = e.x;
             }
 
-            canvasEvent.onmouseup = e =>{
+            eventCanvas.onmouseup = e =>{
                 this._dragging = false;
             }
 
-            canvasEvent.onmousemove = e=>{
-                var eventCtx = this.canvasEvent.getContext('2d');
+            eventCanvas.onmousemove = e=>{
+                var eventCtx = this.eventCanvas.getContext('2d');
                 eventCtx.clearRect(0,0,600,600);
                 eventCtx.beginPath();
-                eventCtx.strokeStyle='#000'
+                eventCtx.strokeStyle='#999999'
                 eventCtx.moveTo(e.x,0)
                 eventCtx.lineTo(e.x,600)
                 eventCtx.fillText(this.xBridge.getIndexByValue(e.x),10,10)
                 eventCtx.stroke()
 
-                var x = getMousePos(canvasEvent,e).x
-                var info = this.layout.getInfoByX(x);
+                var x = getMousePos(eventCanvas,e).x
+                var y = getMousePos(eventCanvas,e).y
+                var info = this.getInfoByX(x);
 
                 eventCtx.font='18px'
-                eventCtx.fillText(info.x+'   '+info['1m_line'].close_px,100,100)
+                //eventCtx.fillText(info.x+'   '+info['1m_line'].close_px,100,100)
+
+                if(!info.outBound){
+                    var text = this.tips(info);
+                    Utils.Canvas.wrapText(eventCtx,text,x,y,200,20)
+                }
 
                 this._curX = e.x;
                 if(this._dragging){
@@ -78,12 +98,12 @@ class Chart{
             }
         }
         if(this.scalable){
-            canvasEvent.onwheel = (e) => {
+            eventCanvas.onwheel = (e) => {
                 var delta = event.wheelDelta // Webkit
                     || -event.detail; // Firefox
                 var scale = delta > 0 ? 1.1 : 1 / 1.1;
 
-                this.setScale(scale, getMousePos(canvasEvent,e).x)
+                this.setScale(scale, getMousePos(eventCanvas,e).x)
                 this.render()
             }
         }
@@ -97,7 +117,6 @@ class Chart{
             this.xBridge = XBridgeFactory('itemWidth',xOptions)
         }
         this.xBridge.buildAxis()
-        this.layout.setXBridge(this.xBridge)
         return this;
     }
 
@@ -115,38 +134,70 @@ class Chart{
         if(!sOpt.key){
             throw new Error('each series should has key')
         }
-
-        let painterType = sOpt.type;
-
-
-        if(!sOpt.bridgeType){
-            sOpt.bridgeType = Constant.YBridge.OHLC;
+        if(sOpt.key in this.componentList){
+            console.error('same key of series:'+sOpt.key)
         }
-        let yBridge = YBridgeFactory(sOpt.bridgeType,sOpt)
 
-        this.layout.addComponent(sOpt.key,painterType,yBridge)
+        let componentType = sOpt.type;
+
+        sOpt.bridgeType = sOpt.bridgeType || Constant.YBridge.OHLC;
+        let yBridge = YBridgeFactory(sOpt.bridgeType,{
+            range:sOpt.range,
+            data:sOpt.data,
+            ohlcNameMap:sOpt.ohlcNameMap,
+            tickCount:sOpt.tickCount,
+            niceTick:sOpt.niceTick
+        })
+
+
+        var cp = ComponentFactory(componentType,{
+            xBridge : this.xBridge,
+            yBridge : yBridge,
+            ctx:this.ctx,
+            yTextFormat:sOpt.yTextFormat,
+            xTextFormat:sOpt.xTextFormat,
+            xGridOn:sOpt.xGridOn,
+            yGridOn:sOpt.yGridOn,
+            gridColor:sOpt.gridColor
+        })
+
+        this.componentList[sOpt.key] = cp;
     }
 
     render(){
         let [x,y,w,h] = this.canvasRect
         this.ctx.clearRect(x,y,w,h)
-        this.layout.render();
+        for(var i in this.componentList){
+            this.componentList[i].render();
+        }
     }
 
-    //reRender(){
-    //    let [x,y,w,h] = this.canvasRect
-    //    this.ctx.clearRect(x,y,w,h)
-    //    this.render()
-    //}
-
     setScale(scale,value){
-        this.layout.setScale(scale,value);
+        this.xBridge.setScale(scale,value);
     }
 
     setTranslation(x){
-        this.layout.setTranslation(x)
+        this.xBridge.setTranslation(x)
     }
 
+    getInfoByX(xValue) {
+        var index = this.xBridge.getIndexByValue(xValue);
+
+        if(index==-1){
+            return {outBound:true}
+        }
+
+
+        var tipInfo = {
+            x: this.xBridge.getDataByIndex(index)
+        }
+
+        for (var i in this.componentList) {
+            var yBridge = this.componentList[i].getYBridge()
+            tipInfo[i] = yBridge.getDataByIndex(index)
+        }
+        return tipInfo;
+    }
 }
 
 export default Chart

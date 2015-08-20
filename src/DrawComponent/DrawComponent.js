@@ -1,3 +1,6 @@
+//TODO delete
+//Deprecated!!!!
+
 class DrawComponent {
 
     constructor(options) {
@@ -51,7 +54,7 @@ class DrawComponent {
     render() {
         var xAxis = this.xBridge.getXAxis();
 
-        this.yBridge.setViewRange(this.xBridge.getViewRange());
+        this.yBridge.setViewDomain(this.xBridge.getViewDomain());
 
         let yAxis = this.yBridge.getYAxis(),
             style = this.style||{};
@@ -82,8 +85,8 @@ class DrawComponent {
     }
 
 
-    setViewRange(viewRange) {
-        this.yBridge.setViewRange(viewRange);
+    setViewDomain(viewDomain) {
+        this.yBridge.setViewDomain(viewDomain);
         return this;
     }
 

@@ -4,6 +4,7 @@ import Utils from '../Utils/Utils.js'
 class XDataBridgeBase{
     constructor(options){
         this.data = options.data || [];
+
         this.range = options.range || [0,0]
         this.gap = options.gap ||0;
         this.direction = options.direction || 'end'
@@ -12,10 +13,10 @@ class XDataBridgeBase{
         this.scale = 1;
         this.isInit = false;
 
-        this.tickCount = options.tickCount;
-        this.ncieTick = options.ncieTick || false;
-    }
+        this.tickCount = options.tickCount || 10;
+        //this.niceTick = options.niceTick || false;
 
+    }
 
     getItemWidth(){
         return this.itemWidth;
@@ -67,12 +68,11 @@ class XDataBridgeBase{
         })
     }
 
-
     getXAxis(){
         if(!this.isInit){
             this.buildAxis();
         }
-        var [beginIdx,endIdx] = this.viewRange
+        var [beginIdx,endIdx] = this.viewDomain
         return this.xAxis.slice(beginIdx,endIdx);
     }
 
@@ -108,47 +108,37 @@ class XDataBridgeBase{
         return this;
     }
 
+    getTicks() {
+        //let [beginIdx,endIdx] = this.viewDomain
+        var halfSpace = (this.itemWidth + this.gap)/2
+        let beginIdx =0, endIdx = this.data.length-1
+        let data = this.data;
+        let beginDate = data[beginIdx],
+            endDate = data[endIdx-1];
 
+        var xAxis = this.xAxis;
 
-    getTicks(){
-        var data = this.data,
-            xAxis = this.xAxis
-        if(!this.ticks){
+        let timeScale = Utils.Math.TimeScale([beginDate, endDate],
+            [xAxis[0],xAxis[xAxis.length-1]]
+        );
 
-            var lineScale = Utils.Math.LineScale([data[0],data[data.length-1]],
-                [xAxis[0],xAxis[xAxis.length-1]]);
+        var scale = this.scale>1?this.scale :1;
+        let ticks = timeScale.ticks(Math.round(this.tickCount*scale))
 
-            var tickInfo = lineScale.ticks(this.tickCount,this.ncieTick,false)
-
-            var start = tickInfo.start,
-                end   = tickInfo.end,
-                step  = tickInfo.step;
-
-            var ticks =[];
-            for(var i = start;i<=end;i+=step){
-                var index = this.getIndexByValue(lineScale.scale(i));
-                ticks.push({
-                    domainValue:data[index],
-                    rangeValue:xAxis[index],
-                    //rangeValue: lineScale.scale(i),
-                    index:index
-                })
-            }
-            this.ticks = ticks;
-        }else{
-            for(var i in this.ticks){
-                var tick = this.ticks[i]
-                var index =tick.index;
-                tick.domainValue = data[index]
-                tick.rangeValue = xAxis[index]
-                //var rangeValue = xAxis[index];
-                //if(rangeValue> this.range[1] || rangeValue<this.range[0]){
-                //    continue;
-                //}
-            }
+        var newTicks= []
+        //console.log(ticks)
+        for(var i = 0;i<ticks.length;i++){
+            var tick = ticks[i];
+            var index = Utils.Algorithms.binarySearch(this.data,tick);
+            if(index==-1)continue;
+            newTicks.push({
+                domainValue:this.data[index],
+                rangeValue:this.xAxis[index]+halfSpace,
+                index:index
+            })
         }
-
-        return this.ticks;
+        //console.log(newTicks)
+        return newTicks;
     }
 
     _updateXAxis(fn){
@@ -167,7 +157,7 @@ class XDataBridgeBase{
         }
         //beginIdx = beginIdx === undefined?0:beginIdx
         endIdx = endIdx === undefined?xAxis.length:endIdx
-        this.viewRange=[beginIdx,endIdx];
+        this.viewDomain=[beginIdx,endIdx];
     }
 
     getData(){
@@ -175,12 +165,12 @@ class XDataBridgeBase{
     }
 
     getViewData(){
-        var [beginIdx,endIdx] = this.viewRange;
+        var [beginIdx,endIdx] = this.viewDomain;
         return this.data.slice(beginIdx,endIdx)
     }
 
-    getViewRange(){
-        return this.viewRange;
+    getViewDomain(){
+        return this.viewDomain;
     }
 
     getRange(){
@@ -220,6 +210,7 @@ class XDataBridgeBase{
         this._updateXAxis(function(item,idx){
             return item + spaceDiff*(idx - index)
         })
+
         return this;
     }
 
@@ -268,7 +259,6 @@ export class XDataBridgeWithFixedCount extends XDataBridgeBase{
         }
         this.fixedCount = options.fixedCount;
     }
-
     initItemWidth(){
         var gap = this.gap;
         var range = this.range;

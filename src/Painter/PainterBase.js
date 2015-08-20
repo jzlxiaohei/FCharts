@@ -5,8 +5,8 @@ class PainterBase{
         //options = options || {};
         this.xRange = options.xRange;//这个暂时并没有什么用
         this.yRange = options.yRange;
-        this.yArr = options.yArr || []; //
-        this.xArr = options.xArr || [];
+        this.yAxis = options.yAxis || []; //
+        this.xAxis = options.xAxis || [];
         this.style = options.style || {};//画图的样式
         this.ctx = options.ctx;
         //this.style.itemWidth = options.style.itemWidth;
@@ -33,15 +33,23 @@ class PainterBase{
     }
 
     setXAxis(x){
-        this.xArr = x;
+        this.xAxis = x;
         return this;
     }
     setYAxis(y){
-        this.yArr = y;
+        this.yAxis = y;
         return this;
     }
 
+    __beforeCheck(){
+        if(this.xAxis.length < this.yAxis.length){
+            console.error('xAxis.length should bigger than yAxis.length')
+        }
+    }
+
+
     beforeDraw(){
+        //this.__beforeCheck();
         this.ctx.save();
         //var xLen = this.xRange[1] - this.xRange[0],
         //    yLen = this.yRange[1] = this.yRange[0]
@@ -57,7 +65,13 @@ class PainterBase{
     render(){
         this.beforeDraw();
         this.draw()
+
+        this.setDefaultStyle();
         this.afterDraw();
+    }
+
+    setDefaultStyle(){
+
     }
 
     afterDraw(){
@@ -65,7 +79,7 @@ class PainterBase{
         var style = this.style;
         ctx.strokeStyle = style.strokeStyle || style.color;
         ctx.fillStyle = style.fillStyle || style.color;
-
+        ctx.lineWidth = style.lineWidth || 1;
         style.brushType = style.brushType || 'stroke';
         if (style.brushType == 'both'){
             ctx.stroke();

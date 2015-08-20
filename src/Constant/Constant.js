@@ -4,11 +4,11 @@ const Constant = {
         CANDLE:'candle',
         AREA:'area',
         X_GRID:'xGrid',
-        Y_GRID:'yGrid'
+        Y_GRID:'yGrid',
+        BAR:'bar'
     },
     YBridge:{
-        'OHLC':'ohlc',
-        'OHLC_PRECLOSE':'ohlc_preClose'
+        'OHLC':'ohlc'
     },
     XBridge:{
         'FIXED_COUNT':'fixedCount',
@@ -17,7 +17,8 @@ const Constant = {
     Component:{
         LINE:'line',
         CANDLE:'candle',
-        AREA:'area'
+        AREA:'area',
+        BAR:'bar'
     }
 }
 

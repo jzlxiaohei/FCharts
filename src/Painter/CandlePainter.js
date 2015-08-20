@@ -7,13 +7,12 @@ class CandlePainter extends PainterBase{
 
     draw(){
         var ctx = this.ctx;
-        var xArr = this.xArr;
-        var yArr = this.yArr;
+        var xAxis = this.xAxis;
+        var yAxis = this.yAxis;
         var itemWidth = this.style.itemWidth|| 6;
-        //console.log(this.style)
-        for(var i = 0;i<yArr.length;i++){
-            var d = yArr[i]
-            var x1 = xArr[i],
+        for(var i = 0;i<yAxis.length;i++){
+            var d = yAxis[i]
+            var x1 = xAxis[i],
                 open = d.open,
                 close = d.close,
                 high = d.high,
@@ -38,7 +37,6 @@ class CandlePainter extends PainterBase{
                 _big = close,_small = open
             }else{
                 _big = open,_small = close
-
             }
 
             ctx.moveTo(midX,_big)
@@ -49,6 +47,9 @@ class CandlePainter extends PainterBase{
         }
     }
 
+    setDefaultStyle(){
+
+    }
 }
 
 export default CandlePainter;

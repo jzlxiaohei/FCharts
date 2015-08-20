@@ -61,47 +61,43 @@ export default class Linear {
         return this.linear(this.range, this.domain, value);
     }
 
-    ticks(count = 10,nice=false,useRange=true) {
+    ticks(count = 10,nice=false) {
         if(nice){
-            return this._niceTick(count,useRange)
+            return this._niceTick(count)
         }else{
-            return this._avgTick(count,useRange)
+            return this._avgTick(count)
         }
     }
 
-    _avgTick(count,useRange){
-        if(useRange){
-            var [min,max] = this.range;
-            if(min > max){
-                [min,max] = [max,min];
-            }
-        }else{
-            var [min,max] = this.domain;
-        }
+    _avgTick(count){
+        var [min,max] = this.domain;
+
+        if(max<=min) return [];
+
         var step =  (max-min)/(count-1) ;
-        if(step<=0){
-            throw new Error('tick step <=0,it will lead endless loop')
+
+
+        var start = Math.floor(min*step/step),
+            end =Math.ceil(max*step/step),
+            step = step
+
+        var ticks = []
+        for(var i = start;i<end;i+=step){
+            ticks.push(i)
         }
-        return{
-            start:Math.floor(min*step/step),
-            end:Math.ceil(max*step/step),
-            step:step
-        }
+        return ticks;
     }
 
     /**
      * @see http://stackoverflow.com/questions/8506881/nice-label-algorithm-for-charts-with-minimum-ticks
      *
      */
-    _niceTick(count,useRange){
-        if(useRange){
-            var [min,max] = this.range;
-            if(min > max){
-                [min,max] = [max,min];
-            }
-        }else{
-            var [min,max] = this.domain;
-        }
+    _niceTick(count){
+
+        var [min,max] = this.domain;
+
+        if(max<=min) return [];
+
         var maxTicks = count;
 
         var niceRangeLen = niceNum(max-min,false);
@@ -112,10 +108,16 @@ export default class Linear {
         var niceMax =
             Math.ceil(max / tickSpacing) * tickSpacing;
 
-        return {
-            start:niceMin,
-            end:niceMax,
-            step:tickSpacing
+
+        var start=niceMin,
+            end  =niceMax,
+            step =tickSpacing
+
+        var ticks = []
+        for(var i = start;i<end;i+=step){
+            ticks.push(i)
         }
+        return ticks;
+
     }
 }

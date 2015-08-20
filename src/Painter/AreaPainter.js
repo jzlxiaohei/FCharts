@@ -14,34 +14,62 @@ class AreaPainter extends PainterBase{
         this.propName = opt.propName || 'close'
     }
 
-    draw(){
-        var ctx = this.ctx;
-        var xArr = this.xArr;
-        var yArr = this.yArr;
-        if(xArr.length ===0 || yArr.length===0){
-            throw new Error('xArr and yArr should not be empty')
+    render(){
+        this.beforeDraw();
+        var xAxis = this.xAxis;
+        var yAxis = this.yAxis;
+        if(xAxis.length ===0 || yAxis.length===0){
+            throw new Error('xAxis and yAxis should not be empty')
         }
-        var propName = this.propName;
-        ctx.moveTo(xArr[0],yArr[0][propName])
+        //var propName = this.propName;
+        //ctx.moveTo(xAxis[0],yAxis[0][propName])
 
-        var len = Math.min(yArr.length,xArr.length)
+        var len = Math.min(yAxis.length,xAxis.length)
         for(var i = 1;i<len;i++){
-            var y = yArr[i][propName]
-            var x = xArr[i]
+            //var y = yAxis[i][propName]
+            var x = xAxis[i],
+                y = yAxis[i]
             ctx.lineTo(x,y)
         }
-        this.setStyle({
-            brushType:'stroke'
-        })
+
+        this.setStyle({brushType:'stroke'})
         this.afterDraw();
 
-        ctx.lineTo(xArr[len-1],600)
-        ctx.lineTo(xArr[0],600)
+        ctx.lineTo(xAxis[len-1],this.xRange[0])
+        ctx.lineTo(xAxis[0],this.xRange[1])
 
-        this.setStyle({
-            brushType:'fill'
-        })
+        this.setStyle({brushType:'fill'})
+        this.afterDraw();
     }
+
+    //draw(){
+    //    var ctx = this.ctx;
+    //    var xAxis = this.xAxis;
+    //    var yAxis = this.yAxis;
+    //    if(xAxis.length ===0 || yAxis.length===0){
+    //        throw new Error('xAxis and yAxis should not be empty')
+    //    }
+    //    var propName = this.propName;
+    //    ctx.moveTo(xAxis[0],yAxis[0][propName])
+    //
+    //    var len = Math.min(yAxis.length,xAxis.length)
+    //    for(var i = 1;i<len;i++){
+    //        var y = yAxis[i][propName]
+    //        var x = xAxis[i]
+    //        ctx.lineTo(x,y)
+    //    }
+    //    this.setStyle({
+    //        brushType:'stroke'
+    //    })
+    //    this.afterDraw();
+    //
+    //    ctx.lineTo(xAxis[len-1],600)
+    //    ctx.lineTo(xAxis[0],600)
+    //
+    //    this.setStyle({
+    //        brushType:'fill'
+    //    })
+    //}
 }
 
 export default AreaPainter;

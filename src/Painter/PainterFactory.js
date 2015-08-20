@@ -1,23 +1,23 @@
-//deprecated!!!
+import CandlePainter from './CandlePainter.js'
+import AreaPainter from './AreaPainter.js'
+import LinePainter from './LinePainter.js'
+import XGridPainter from './XGridPainter.js'
+import YGridPainter from './YGridPainter.js'
+import BarPainter from './BarPainter.js'
 
-import CandlePainter from '../Painter/CandlePainter.js'
-import AreaPainter from '../Painter/AreaPainter.js'
-import LinePainter from '../Painter/LinePainter.js'
-import XGridPainter from '../Painter/XGridPainter.js'
-import YGridPainter from '../Painter/YGridPainter.js'
-import BarPainter from '../Painter/BarPainter.js'
 
 import Constant from '../Constant/Constant.js'
 import Utils from '../Utils/Utils.js'
 
-var id = Utils.Fn.identify
+//var id = Utils.Fn.identify
 
 var kvArr =[
     [Constant.Painter.LINE,LinePainter],
     [Constant.Painter.CANDLE,CandlePainter],
     [Constant.Painter.AREA,AreaPainter],
     [Constant.Painter.X_GRID,XGridPainter],
-    [Constant.Painter.Y_GRID,YGridPainter]
+    [Constant.Painter.Y_GRID,YGridPainter],
+    [Constant.Painter.BAR,BarPainter]
 ]
 
 const FactoryMap = Utils.Common.makeKvObj(kvArr);
