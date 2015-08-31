@@ -6,16 +6,28 @@
     <script src="./lib/jquery.js"></script>
     <script src="./lib/hsData.js"></script>
     <script src="./lib/async.js"></script>
-    <script src="/assets/FCharts.js"></script>
+    <script src="/build/FCharts.js"></script>
+    <!--<script src="../build/FCharts.js"></script>-->
+    <style>
+        html, body {
+            width:  100%;
+            height: 100%;
+            margin: 0px;
+        }
+    </style>
 </head>
 <body>
 
     <div>
-        <canvas id="canvas" width="600" height="600" style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
-        <canvas id="canvas-event" width="600" height="600" style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
+        <canvas id="canvas"  style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
+        <canvas id="canvas-event"  style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
     </div>
 
     <script>
+
+
+
+
         var start_date = new Date();
         var parseDateToFormat = function(d){
             var year = d.getFullYear()
@@ -223,10 +235,10 @@
         var yValueData=[],barData=[]
         candle[prod_code].forEach(function(cd){
             yData.push( {
-                open_px:( cd[_m['open_px']] ) ,
-                high_px : cd[_m['high_px']]  ,
-                low_px :  cd[_m['low_px']]  ,
-                close_px: cd[_m['close_px']]
+                open:( cd[_m['open_px']] ) ,
+                high : cd[_m['high_px']]  ,
+                low :  cd[_m['low_px']]  ,
+                close: cd[_m['close_px']]
             })
             yValueData.push(cd[_m['close_px']])
             xData.push(dateStr2Obj(cd[_m['min_time']]))
@@ -234,71 +246,113 @@
         })
 
 
+        var beginDate=xData[0]
+        var endDate = new Date(beginDate);
+        endDate.setHours(15)
+        endDate.setMinutes(0)
+
+
+        var defaultStyle = FCharts.DefaultStyle;
+        defaultStyle.canvasColor='#242424'
         var chart = new FCharts.Chart({
             ctx: document.getElementById('canvas').getContext('2d'),
             eventCanvas: document.getElementById('canvas-event'),
-            canvasRect: [0, 0, 600, 600],
+            drawCanvas: document.getElementById('canvas'),
             movable: true,
             scalable: true,
             xAxis: {
-                itemWidth: 6,
+                itemWidth: 4,
                 range: [0, 600],
                 data: xData,
                 gap: 2
+//                beginDate:beginDate,
+//                endDate:endDate
             },
             tips:function(item){
-                var x = item.x,
-                        y = item['1m_line'];
+                var x = item.x, y = item['1m_candle'],
+                b=item['1m_bar']
                 return x.getHours()+':'+ x.getMinutes() + '\n'+
-                        'open:'+ y.open_px + '\n'+
-                        'close:'+ y.close_px + '\n'
+                        'open:'+ y.open + '\n'+
+                        'close:'+ y.close + '\n'+
+                        '成交量（手）'+ Math.round(b/100)
             },
-            series: [{
-                range: [20, 380],
-                data: yData,
-                key: '1m_line',
-                type: 'candle',
-                ohlcNameMap: {
-                    open: "open_px",
-                    close: "close_px",
-                    high: "high_px",
-                    low: "low_px"
-                },
-                tickCount: 10,
-                niceTick:true,
-                gridColor: '#a9a9a9',
-                style: {
-                    up: {},
-                    down: {}
-                },
-                yGridOn:true,
-                xGridOn:true,
-                xTextFormat: function (item) {
-                    return item.getHours() + '时:' + item.getMinutes() + '分';
-                },
-                yTextFormat: function (item) {
-                    return item.toFixed(2)
-                }
-            },
-                {
+            series: {
+                '1m_bar':{
                     range:[400,600],
-                    key:'1m_bar',
                     type:'bar',
                     data:barData,
                     yGridOn:true,
                     yGridLine:false,
                     tickCount:5,
+                    candleData:yData,
                     yTextFormat: function (item) {
                         if(item>1000000){
-                            var num = (item/1000000)>>0
+                            var num = Math.round(item/1000000)
                             return num+'万手'
                         }
-                        return (item/100)>>0
+                        return ( Math.round(item/100) )+ '手'
                     },
-                    gridColor: '#a9a9a9'
-                }]
+                    gridColor: '#a9a9a9',
+                    niceTick:true
+                },
+                '1m_candle':{
+                    range: [20, 380],
+                    data: yData,
+                    type: 'candle',
+                    tickCount: 10,
+                    niceTick:true,
+                    gridColor: '#555',
+                    style: {
+                        up: {},
+                        down: {}
+                    },
+                    yGridOn:true,
+                    xGridOn:true,
+                    labels:[{
+                        pos: 'left',
+                        top:5,
+                        place:'inner',
+                        value: function (i) {
+                            return i.toFixed(2)
+                        }
+                    },{
+                        pos: 'right',
+                        place:'inner',
+                        top:5,
+                        value: function (i) {
+                            return i.toFixed(3)
+                        },
+                        color:'red'
+                    }],
+                    xTextFormat: function (item) {
+                        return item.getHours() + '时:' + item.getMinutes() + '分';
+                    }
+//                    yTextFormat: function (item) {
+//                        return item.toFixed(2)
+//                    },
+
+                }
+            }
         })
-        chart.render();
+//        chart.render();
+
+        function resizeCanvasUtil(htmlCanvas){
+            htmlCanvas.width = window.innerWidth;
+            htmlCanvas.height = window.innerHeight;
+        }
+
+        function resizeCanvas(){
+            resizeCanvasUtil(document.getElementById('canvas'))
+            resizeCanvasUtil(document.getElementById('canvas-event'))
+            chart.xBridge.range=[0,window.innerWidth]
+            var height = window.innerHeight;
+            chart.getComponent('1m_candle').yBridge.range = [0,height *.68]
+            chart.getComponent('1m_bar').yBridge.range = [height *.72,height]
+            chart.render();
+        }
+
+        window.addEventListener('resize', resizeCanvas, false);
+        resizeCanvas();
 
     </script>
 </body>

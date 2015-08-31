@@ -4,9 +4,10 @@ import YBridgeFactory from '../Factory/YBridgeFactory.js'
 import XBridgeFactory from '../Factory/XBridgeFactory.js'
 
 import ComponentFactory from '../DrawComponent/ComponentFactory.js'
-
 import Constant from '../Constant/Constant.js'
 import Utils from '../Utils/Utils.js'
+import DefaultStyle from '../DefaultStyle/DefaultStyle.js'
+
 function getMousePos(canvas, evt) {
     var rect = canvas.getBoundingClientRect();
     return {
@@ -18,13 +19,11 @@ function getMousePos(canvas, evt) {
 class Chart{
     constructor(options){
         this.ctx = options.ctx;
-        this.canvasRect = options.canvasRect;
+        this.drawCanvas = options.drawCanvas;
         this.seriesOptions = options.series || [];
         this.xAxisOptions = options.xAxis;
 
-        //this.layout = new Layout({
-        //    ctx:this.ctx
-        //});
+        //this.canvasColor = options.canvasColor|| DefaultStyle.canvasColor;
 
         this.eventCanvas = options.eventCanvas;
         this.movable = options.movable || false;
@@ -32,6 +31,8 @@ class Chart{
 
         this.componentList = {}
         this.tips = options.tips;
+        this.defaultStyle = options.defaultStyle|| DefaultStyle
+        this.xAxisInited = false;
         this.init();
     }
 
@@ -43,13 +44,18 @@ class Chart{
         return this;
     }
 
-    init(){
-        this._initXAxis()
-            ._initSeries()
-            ._initEvent();
+    initXAxis(){
+        this.xAxisInited = true;
+        this.xBridge.buildAxis();
     }
 
-    _initEvent(){
+    init(){
+        this._buildXAxis()
+            ._buildSeries()
+            ._buildEvent();
+    }
+
+    _buildEvent(){
         if(!this.eventCanvas){
             console.warn('eventCanvas not set')
         }
@@ -69,11 +75,11 @@ class Chart{
 
             eventCanvas.onmousemove = e=>{
                 var eventCtx = this.eventCanvas.getContext('2d');
-                eventCtx.clearRect(0,0,600,600);
+                eventCtx.clearRect(0,0,eventCanvas.width,eventCanvas.height);
                 eventCtx.beginPath();
                 eventCtx.strokeStyle='#999999'
                 eventCtx.moveTo(e.x,0)
-                eventCtx.lineTo(e.x,600)
+                eventCtx.lineTo(e.x,eventCanvas.height)
                 eventCtx.fillText(this.xBridge.getIndexByValue(e.x),10,10)
                 eventCtx.stroke()
 
@@ -82,12 +88,14 @@ class Chart{
                 var info = this.getInfoByX(x);
 
                 eventCtx.font='18px'
-                //eventCtx.fillText(info.x+'   '+info['1m_line'].close_px,100,100)
 
+                eventCtx.save()
+                eventCtx.fillStyle=this.defaultStyle.tipColor;
                 if(!info.outBound){
                     var text = this.tips(info);
                     Utils.Canvas.wrapText(eventCtx,text,x,y,200,20)
                 }
+                eventCtx.restore();
 
                 this._curX = e.x;
                 if(this._dragging){
@@ -109,64 +117,69 @@ class Chart{
         }
     }
 
-    _initXAxis(){
+    _buildXAxis(){
         let xOptions = this.xAxisOptions;
         if(xOptions.fixedCount){
             this.xBridge = XBridgeFactory('fixedCount',xOptions)
         }else{
             this.xBridge = XBridgeFactory('itemWidth',xOptions)
         }
-        this.xBridge.buildAxis()
+        //this.xBridge.buildAxis()
         return this;
     }
 
 
-    _initSeries(){
+    _buildSeries(){
         let sOptions = this.seriesOptions;
-        for(var i = 0;i<sOptions.length;i++){
+        for(var i in sOptions){
             var sOpt = sOptions[i]
-            this.addSeries(sOpt)
+            this.addSeries(i,sOpt)
         }
         return this;
     }
 
-    addSeries(sOpt){
-        if(!sOpt.key){
-            throw new Error('each series should has key')
-        }
-        if(sOpt.key in this.componentList){
-            console.error('same key of series:'+sOpt.key)
-        }
-
+    addSeries(key,sOpt){
         let componentType = sOpt.type;
-
         sOpt.bridgeType = sOpt.bridgeType || Constant.YBridge.OHLC;
         let yBridge = YBridgeFactory(sOpt.bridgeType,{
             range:sOpt.range,
             data:sOpt.data,
-            ohlcNameMap:sOpt.ohlcNameMap,
             tickCount:sOpt.tickCount,
             niceTick:sOpt.niceTick
         })
 
+        //console.log(sOpt)
 
         var cp = ComponentFactory(componentType,{
+            chart:this,
             xBridge : this.xBridge,
             yBridge : yBridge,
             ctx:this.ctx,
-            yTextFormat:sOpt.yTextFormat,
+            //yTextFormat:sOpt.yTextFormat,
             xTextFormat:sOpt.xTextFormat,
             xGridOn:sOpt.xGridOn,
             yGridOn:sOpt.yGridOn,
-            gridColor:sOpt.gridColor
+            gridColor:sOpt.gridColor,
+            candleData:sOpt.candleData,
+            style:sOpt.style,
+            labels:sOpt.labels
         })
 
-        this.componentList[sOpt.key] = cp;
+        this.componentList[key] = cp;
+    }
+
+    getComponent(key){
+        return this.componentList[key];
     }
 
     render(){
-        let [x,y,w,h] = this.canvasRect
-        this.ctx.clearRect(x,y,w,h)
+        //let [x,y,w,h] = this.canvasRect
+        //this.ctx.clearRect(0,0,600,600)
+        if(!this.xAxisInited){
+            this.initXAxis();
+        }
+        this.ctx.fillStyle= this.canvasColor || this.defaultStyle.canvasColor
+        this.ctx.fillRect(0,0,this.drawCanvas.width,this.drawCanvas.height)
         for(var i in this.componentList){
             this.componentList[i].render();
         }
@@ -186,7 +199,6 @@ class Chart{
         if(index==-1){
             return {outBound:true}
         }
-
 
         var tipInfo = {
             x: this.xBridge.getDataByIndex(index)

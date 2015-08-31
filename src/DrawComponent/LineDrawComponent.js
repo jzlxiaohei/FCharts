@@ -3,6 +3,7 @@ import BaseDrawComponent from './BaseDrawComponent.js'
 import Constant from '../Constant/Constant.js'
 import PainterFactory from '../Painter/PainterFactory.js'
 
+//TODO defaultStyle
 
 class LineDrawComponent extends BaseDrawComponent{
 

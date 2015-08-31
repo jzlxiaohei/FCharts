@@ -51,6 +51,9 @@ class Layout{
         }
     }
 
+
+
+
     setScale(scale,value){
         this.xBridge.setScale(scale,value)
     }

@@ -1,43 +1,45 @@
 import PainterFactory from '../Painter/PainterFactory.js'
 import Constant from '../Constant/Constant.js'
 import Utils from '../Utils/Utils.js'
+import DefaultStyle from '../DefaultStyle/DefaultStyle.js'
+
 
 var textFormatFn = function(t){
-    if(t==undefined){
-        return ''
-    }
-    return t;
+    return ''
 }
 
 class BaseDrawComponent{
     constructor(options){
-        this.ctx = options.ctx;
+        //this.ctx = options.ctx;
+        //this.type = 'base'
+        this.chart = options.chart;
+        this.defaultStyle=this.chart.defaultStyle;
+
         this.xBridge = options.xBridge
         this.yBridge = options.yBridge
 
 
-        //TODO: set to false or remove .set default just for grid test
-        this.xGridOn = options.xGridOn || false;//TODO delete:不应该由单个component管理xGrid
+        this.xGridOn = options.xGridOn || false;
         this.yGridOn = options.yGridOn || false;
-        //
-        //this.yGridPainter = PainterFactory('yGrid')
-        //this.xGridPainter = PainterFactory('xGrid');
 
         this.setXGridOn(this.xGridOn);
         this.setYGridOn(this.yGridOn);
 
-        this.xTextFormat = options.xTextFormat || textFormatFn //TODO delete:不应该由单个component管理xText
-        this.yTextFormat = options.yTextFormat || textFormatFn
+        this.xTextFormat = options.xTextFormat || textFormatFn
+        //this.yTextFormat = options.yTextFormat || textFormatFn
         //this.painterInited = false;
 
-        this.gridColor = options.gridColor
-        this.gridWidth = options.gridWidth
+        this.gridColor = options.gridColor || DefaultStyle.gridColor
+        this.gridWidth = options.gridWidth || 1
+        this.tickLabelColor = options.tickLabelColor || DefaultStyle.tickLabelColor
+        this.labels = options.labels || [];
+        this.style = options.style||{}
     }
 
-    setCtx(ctx){
-        this.ctx = ctx;
-        return this;
-    }
+    //setCtx(ctx){
+    //    this.ctx = ctx;
+    //    return this;
+    //}
 
     setYBridge(yBridge){
         this.yBridge = yBridge
@@ -64,8 +66,10 @@ class BaseDrawComponent{
         return this;
     }
 
+    //yBridge 设置可视区，非常重要！！！
     beforeDraw(){
         this.yBridge.setViewDomain(this.xBridge.getViewDomain());
+        this.ctx = this.chart.ctx;
     }
 
     afterDraw(){
@@ -90,11 +94,11 @@ class BaseDrawComponent{
         var yRange = this.yBridge.getRange();
         var xRange = this.xBridge.getRange();
 
-        var xTextArr = []
-        for(let i = 0;i<xTicks.length;i++){
-            var text = this.xTextFormat(xTicks[i].domainValue)//TODO format fns
-            xTextArr.push(text)
-        }
+        //var xTextArr = []
+        //for(let i = 0;i<xTicks.length;i++){
+        //    var text = this.xTextFormat(xTicks[i].domainValue)//TODO format fns
+        //    xTextArr.push(text)
+        //}
 
         if(this.yGridOn){
             this.yGridPainter
@@ -104,9 +108,11 @@ class BaseDrawComponent{
                 .setYRange(yRange)
                 .setStyle({
                     strokeStyle:this.gridColor,
-                    lineWidth:this.gridWidth
+                    lineWidth:this.gridWidth,
+                    tickLabelColor:this.tickLabelColor
                 })
-                .setTextArray(yTicks.map(i=>this.yTextFormat(i.domainValue)))//format fns
+                //.setTextArray(yTicks.map(i=>this.yTextFormat(i.domainValue)))//format fns
+                .setLabels(this.labels)
                 .render()
         }
 
@@ -118,7 +124,8 @@ class BaseDrawComponent{
                 .setYRange(yRange)
                 .setStyle({
                     strokeStyle:this.gridColor,
-                    lineWidth:this.gridWidth
+                    lineWidth:this.gridWidth,
+                    tickLabelColor:this.tickLabelColor
                 })
                 .setTextArray(xTicks.map(i=> this.xTextFormat(i.domainValue)))
                 .render()

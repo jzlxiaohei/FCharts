@@ -28,9 +28,6 @@ class BarPainter extends PainterBase{
         }
     }
 
-    setDefaultStyle(){
-
-    }
 
 }
 

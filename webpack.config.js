@@ -9,7 +9,7 @@ module.exports = {
     output:{
         path:path.join(__dirname,'build'),
         filename:'[name].js',
-        publicPath:'/assets/',
+        publicPath:'/build/',
         library:'FCharts',
         libraryTarget:'umd'
     },

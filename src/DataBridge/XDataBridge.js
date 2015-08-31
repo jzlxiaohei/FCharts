@@ -5,6 +5,8 @@ class XDataBridgeBase{
     constructor(options){
         this.data = options.data || [];
 
+        this.beginDate = options.beginDate;
+        this.endDate = options.endDate;
         this.range = options.range || [0,0]
         this.gap = options.gap ||0;
         this.direction = options.direction || 'end'
@@ -113,8 +115,8 @@ class XDataBridgeBase{
         var halfSpace = (this.itemWidth + this.gap)/2
         let beginIdx =0, endIdx = this.data.length-1
         let data = this.data;
-        let beginDate = data[beginIdx],
-            endDate = data[endIdx-1];
+        let beginDate = this.beginDate || data[beginIdx],
+            endDate = this.endDate || data[endIdx-1];
 
         var xAxis = this.xAxis;
 
@@ -130,6 +132,7 @@ class XDataBridgeBase{
         for(var i = 0;i<ticks.length;i++){
             var tick = ticks[i];
             var index = Utils.Algorithms.binarySearch(this.data,tick);
+
             if(index==-1)continue;
             newTicks.push({
                 domainValue:this.data[index],

@@ -3,28 +3,13 @@ import Utils from '../Utils/Utils.js'
 import Constant from '../Constant/Constant.js'
 
 
-var ohlcNameMap = {
-    open:'open',
-    close:'close',
-    high:'high',
-    low:'low'
-}
-/**
-    var ohlcNameMap = {
-        open_px:'open',
-        close_px:'close',
-        high_px:'high',
-        low_px:'low'
-    }
- */
-
 export class YDataBridge{
     constructor(options){
         this.axisType = options.axisType || 'default' //symmetry
 
-        this.ohlcNameMap = options.ohlcNameMap || ohlcNameMap;
+        //this.ohlcNameMap = options.ohlcNameMap || ohlcNameMap;
 
-        this.ohlcNameMapInvert = Utils.Common.invertKv(this.ohlcNameMap);
+        //this.ohlcNameMapInvert = Utils.Common.invertKv(this.ohlcNameMap);
         this.data  = options.data||[] //原始数据 一般为[{open,high,low,close} ... ]
         this.range = options.range||[0,0]
 
@@ -38,26 +23,26 @@ export class YDataBridge{
         this.isInit =  false;
     }
 
-    _m(k){
-        var ohlcNameMap = this.ohlcNameMap
-        if(k in ohlcNameMap){
-            return ohlcNameMap[k]
-        }
-        return k;
-    }
-
-    _mi(k){
-        var ohlcNameMapInvert = this.ohlcNameMapInvert
-        if(k in ohlcNameMapInvert){
-            return ohlcNameMapInvert[k]
-        }
-        return k;
-    }
+    //_m(k){
+    //    var ohlcNameMap = this.ohlcNameMap
+    //    if(k in ohlcNameMap){
+    //        return ohlcNameMap[k]
+    //    }
+    //    return k;
+    //}
+    //
+    //_mi(k){
+    //    var ohlcNameMapInvert = this.ohlcNameMapInvert
+    //    if(k in ohlcNameMapInvert){
+    //        return ohlcNameMapInvert[k]
+    //    }
+    //    return k;
+    //}
 
     cloneWithOptions(extraOptions){
         var originOptions = {
             axisType:this.axisType,
-            _m : this._m,
+            //_m : this._m,
             range:[this.range[0],this.range[1]]
         }
         var options = Utils.Common.merge(originOptions,extraOptions,true)
@@ -76,6 +61,7 @@ export class YDataBridge{
 
     _calcMaxMin(){
 
+
         var [beginIdx,endIdx] = this.viewDomain;
 
         var max = -Infinity,
@@ -84,8 +70,8 @@ export class YDataBridge{
         if(typeof data[0] === 'object'){
             for(var i = beginIdx;i<endIdx;i++){
                 var dataItem = data[i]
-                var localMax = dataItem[this._m('high')] ,
-                    localMin = dataItem [this._m('low')]
+                var localMax = dataItem['high'] ,
+                    localMin = dataItem ['low']
                 if(localMax > max){max = localMax;}
                 if(localMin < min){min = localMin}
             }
@@ -127,8 +113,8 @@ export class YDataBridge{
             if(typeof y ==='object'){
                 var dataObj = {}
                 for(var i in y){
-                    var _i = this._mi(i);
-                    dataObj[_i] = rangeLen - ls.scale(y[i])
+                    //var _i = this._mi(i);
+                    dataObj[i] = rangeLen - ls.scale(y[i])
                 }
                 return dataObj
             }else{
