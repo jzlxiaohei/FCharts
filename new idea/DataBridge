@@ -1,0 +1,7 @@
+xDataBridge
+
+yDataBridgeList={
+    main:yDataBridge=>upList,downList
+    key2:yDataBridge
+    
+}
