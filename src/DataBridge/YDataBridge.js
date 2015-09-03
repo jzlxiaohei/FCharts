@@ -2,6 +2,7 @@ import Utils from '../Utils/Utils.js'
 //import _m  from '../Utils/OhlcNameMap.js'
 import Constant from '../Constant/Constant.js'
 
+//如果单个数据为对象，必须为{open,close,high,low}
 
 export class YDataBridge{
     constructor(options){

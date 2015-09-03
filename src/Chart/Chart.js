@@ -74,18 +74,22 @@ class Chart{
             }
 
             eventCanvas.onmousemove = e=>{
+                //console.log(e)
+
                 var eventCtx = this.eventCanvas.getContext('2d');
                 eventCtx.clearRect(0,0,eventCanvas.width,eventCanvas.height);
-                eventCtx.beginPath();
-                eventCtx.strokeStyle='#999999'
-                eventCtx.moveTo(e.x,0)
-                eventCtx.lineTo(e.x,eventCanvas.height)
-                eventCtx.fillText(this.xBridge.getIndexByValue(e.x),10,10)
-                eventCtx.stroke()
+
 
                 var x = getMousePos(eventCanvas,e).x
                 var y = getMousePos(eventCanvas,e).y
                 var info = this.getInfoByX(x);
+
+                eventCtx.beginPath();
+                eventCtx.strokeStyle='#999999'
+                eventCtx.moveTo(x,0)
+                eventCtx.lineTo(x,eventCanvas.height)
+                eventCtx.fillText(this.xBridge.getIndexByValue(x),10,10)
+                eventCtx.stroke()
 
                 eventCtx.font='18px'
 
@@ -97,21 +101,24 @@ class Chart{
                 }
                 eventCtx.restore();
 
-                this._curX = e.x;
+                this._curX = x;
+                console.log(this._curX,this._lastX)
                 if(this._dragging){
-                    this.setTranslation(this._curX-this._lastX)
+                    this.setTranslation(this._curX- (this._lastX?this._lastX:this._curX) )
                     this.render()
                 }
+
                 this._lastX = this._curX
             }
         }
         if(this.scalable){
-            eventCanvas.onwheel = (e) => {
+            eventCanvas.onwheel = (event) => {
                 var delta = event.wheelDelta // Webkit
+                    || -event.deltaY
                     || -event.detail; // Firefox
                 var scale = delta > 0 ? 1.1 : 1 / 1.1;
 
-                this.setScale(scale, getMousePos(eventCanvas,e).x)
+                this.setScale(scale, getMousePos(eventCanvas,event).x)
                 this.render()
             }
         }

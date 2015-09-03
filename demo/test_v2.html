@@ -282,16 +282,20 @@
                     type:'bar',
                     data:barData,
                     yGridOn:true,
-                    yGridLine:false,
+//                    yGridLine:false,
                     tickCount:5,
                     candleData:yData,
-                    yTextFormat: function (item) {
-                        if(item>1000000){
-                            var num = Math.round(item/1000000)
-                            return num+'万手'
+                    labels:[ {
+                        pos:'right',
+                        place:'inner',
+                        value:function(item){
+                            if(item>1000000){
+                                var num = Math.round(item/1000000)
+                                return num+'万手'
+                            }
+                            return ( Math.round(item/100) )+ '手'
                         }
-                        return ( Math.round(item/100) )+ '手'
-                    },
+                    }],
                     gridColor: '#a9a9a9',
                     niceTick:true
                 },
@@ -322,7 +326,7 @@
                         value: function (i) {
                             return i.toFixed(3)
                         },
-                        color:'red'
+                        color:'red'//not used
                     }],
                     xTextFormat: function (item) {
                         return item.getHours() + '时:' + item.getMinutes() + '分';

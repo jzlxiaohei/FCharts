@@ -11,7 +11,7 @@ import PainterBase from './PainterBase.js'
 class AreaPainter extends PainterBase{
     constructor(opt={}){
         super(opt);
-        this.propName = opt.propName || 'close'
+        //this.propName = opt.propName || 'close'
     }
 
     render(){

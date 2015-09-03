@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "",
   "scripts": {
-    "test": "mocha test/**/TimeFns_test.js --compilers js:babel/register"
+    "test": "mocha test/**/*.js --compilers js:babel/register"
   },
   "author": "zilong",
   "license": "MIT",

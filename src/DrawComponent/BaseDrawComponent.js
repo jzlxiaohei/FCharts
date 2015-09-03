@@ -94,11 +94,6 @@ class BaseDrawComponent{
         var yRange = this.yBridge.getRange();
         var xRange = this.xBridge.getRange();
 
-        //var xTextArr = []
-        //for(let i = 0;i<xTicks.length;i++){
-        //    var text = this.xTextFormat(xTicks[i].domainValue)//TODO format fns
-        //    xTextArr.push(text)
-        //}
 
         if(this.yGridOn){
             this.yGridPainter

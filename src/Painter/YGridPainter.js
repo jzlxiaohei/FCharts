@@ -48,8 +48,6 @@ class YGridPainter extends PainterBase{
         var [xBegin,xEnd] = this.xRange
         //var fontHeight = 0;
         ctx.save();
-        ctx.fillStyle = this.style.tickLabelColor;
-        ctx.textAlign='end'
         for(var i =0;i<this.yAxis.length;i++){
             var y = this.yAxis[i].rangeValue
             ctx.moveTo(xBegin,y)
@@ -74,7 +72,7 @@ class YGridPainter extends PainterBase{
     _drawSingle(yList,yText,opt){
         var [xBegin,xEnd] = this.xRange;
         let base,textAlign;
-        var top = opt.top;
+        var top = opt.top || 0;
         if(opt.pos=='left'){
             if(opt.place=='inner'){
                 textAlign='start'
