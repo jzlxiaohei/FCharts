@@ -1,18 +1,19 @@
 import Utils from '../Utils/Utils.js'
-//import _m  from '../Utils/OhlcNameMap.js'
 import Constant from '../Constant/Constant.js'
 
-//如果单个数据为对象，必须为{open,close,high,low}
-
+/**
+ * @class y数据桥梁
+ *
+ *  前提：
+ *      原始数据项，分为两种，一个是数值[0,1,2]..,另一个是对象，且必须为{open,close,high,low}
+ */
 export class YDataBridge{
     constructor(options){
         this.axisType = options.axisType || 'default' //symmetry
 
-        //this.ohlcNameMap = options.ohlcNameMap || ohlcNameMap;
 
-        //this.ohlcNameMapInvert = Utils.Common.invertKv(this.ohlcNameMap);
-        this.data  = options.data||[] //原始数据 一般为[{open,high,low,close} ... ]
-        this.range = options.range||[0,0]
+        this.data  = options.data||[]
+        this.range = options.range//||[0,0]
 
         this.viewDomain = options.viewDomain || [0,this.data.length]
         this.yAxis = new Array(this.data.length);
@@ -21,53 +22,37 @@ export class YDataBridge{
 
         this.linearScale = Utils.Math.LineScale();
 
-        this.isInit =  false;
+        this.buildAxis();
     }
 
-    //_m(k){
-    //    var ohlcNameMap = this.ohlcNameMap
-    //    if(k in ohlcNameMap){
-    //        return ohlcNameMap[k]
-    //    }
-    //    return k;
-    //}
-    //
-    //_mi(k){
-    //    var ohlcNameMapInvert = this.ohlcNameMapInvert
-    //    if(k in ohlcNameMapInvert){
-    //        return ohlcNameMapInvert[k]
-    //    }
-    //    return k;
-    //}
 
     cloneWithOptions(extraOptions){
         var originOptions = {
             axisType:this.axisType,
-            //_m : this._m,
             range:[this.range[0],this.range[1]]
         }
         var options = Utils.Common.merge(originOptions,extraOptions,true)
         return new YDataBridge(options)
     }
 
-    addFirst(arr){
-        Utils.Array.unshift(this.data,arr);
-        return this;
+    setData(data){
+        this.data=data;
+        this.buildAxis();
     }
 
-    addLast(arr){
-        Utils.Array.push(this.data,arr)
-        return this;
-    }
 
+    /**
+     * 计算最大最小值
+     * @private
+     */
     _calcMaxMin(){
-
 
         var [beginIdx,endIdx] = this.viewDomain;
 
         var max = -Infinity,
             min =  Infinity;
         var data = this.data;
+        //数据项为数值和对象两种情况
         if(typeof data[0] === 'object'){
             for(var i = beginIdx;i<endIdx;i++){
                 var dataItem = data[i]
@@ -84,9 +69,8 @@ export class YDataBridge{
             }
         }
 
-
-
-        if(this.axisType==='symmetry'){
+        //axisType为对称时
+        if(this.axisType===Constant.YAxisType.SYMMETRY){
             var absMax = Math.max(
                 Math.abs(min),
                 Math.abs(max)
@@ -94,39 +78,33 @@ export class YDataBridge{
             min = -absMax,max=absMax;
         }
         this.domain = [min,max]
-        this.linearScale.setDomain(this.domain)
+
+        this.linearScale
+            .setDomain(this.domain)
             .setRange(this.range)
     }
 
     buildAxis(){
-        if(!this.isInit){
-            this.isInit = true;
-        }
-
         this._calcMaxMin()
-        var data = this.data;
+        const data = this.data;
 
-        //console.log(this.domain)
-        var rangeLen = this.range[1] + this.range[0]
-        var ls = this.linearScale;
+        const rangeLen = this.range[1] + this.range[0]
+        const ls = this.linearScale;
 
-        let tranYFn = y =>{
-            if(typeof y ==='object'){
-                var dataObj = {}
-                for(var i in y){
-                    //var _i = this._mi(i);
-                    dataObj[i] = rangeLen - ls.scale(y[i])
+        const [beginIdx,endIdx] = this.viewDomain;
+
+        this.yAxis = data.slice(beginIdx,endIdx).map( y =>{
+                if(typeof y ==='object'){
+                    var dataObj = {}
+                    for(var i in y){
+                        dataObj[i] = rangeLen - ls.scale(y[i])
+                    }
+                    return dataObj
+                }else{
+                    return rangeLen - ls.scale(y);
                 }
-                return dataObj
-            }else{
-                return rangeLen - ls.scale(y);
             }
-        }
-
-        var [beginIdx,endIdx] = this.viewDomain;
-        this.yAxis = data.slice(beginIdx,endIdx).map(item=>{
-            return tranYFn(item)
-        })
+        )
 
         return this;
     }
@@ -142,26 +120,27 @@ export class YDataBridge{
         return this;
     }
 
-    getTicks(){
-        //var lineScale =  Utils.Math.LineScale(this.domain)
-        var ticks = this.linearScale.ticks(this.tickCount,this.niceTick);
-        var rangeLen = this.range[1] + this.range[0]
+    getYAxis(){
+        return this.yAxis;
+    }
 
-        var newTicks = []
+    getTicks(){
+        const ticks = this.linearScale.ticks(this.tickCount,this.niceTick);
+        const rangeLen = this.range[1] + this.range[0]
+
+        let ticksWithoutOutBound = []
         for(var i = 0;i<ticks.length;i++){
             var domain = ticks[i]
             var rangeValue = rangeLen - this.linearScale.scale(domain)
             if(rangeValue > this.range[1] || rangeValue<this.range[0]){
                 continue;
             }
-            newTicks.push({
-                //rangeValue:i,
-                //domainValue:this.linearScale.invert(i)
+            ticksWithoutOutBound.push({
                 domainValue: domain,
                 rangeValue:rangeValue
             })
         }
-        return newTicks
+        return ticksWithoutOutBound
     }
 
     getViewData(){
@@ -170,12 +149,6 @@ export class YDataBridge{
     }
 
     getData(){
-        //if(origin){
-        //    return this.data;
-        //}else{
-        //    var [beginIdx,endIdx] = this.viewDomain;
-        //    return this.data.slice(beginIdx,endIdx)
-        //}
         return this.data;
     }
 
@@ -183,12 +156,6 @@ export class YDataBridge{
         return this.data[index];
     }
 
-    getYAxis(){
-        if(!this.isInit){
-            this.buildAxis();
-        }
-        return this.yAxis;
-    }
 
     getViewDomain(){
         return this.viewDomain;

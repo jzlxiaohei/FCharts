@@ -142,6 +142,13 @@ utils.Canvas={
             context.fillText(line, x, y);
             y += lineHeight;
         }
+    },
+    getMousePos(canvas, evt) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+            x: evt.clientX - rect.left,
+            y: evt.clientY - rect.top
+        };
     }
 }
 

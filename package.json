@@ -15,8 +15,10 @@
     "babelify": "^6.1.2",
     "gulp": "^3.8.11",
     "gulp-util": "^3.0.6",
+    "invariant": "^2.1.1",
     "webpack": "^1.10.1",
-    "webpack-dev-server": "^1.10.1"
+    "webpack-dev-server": "^1.10.1",
+    "wolfy87-eventemitter": "^4.3.0"
   },
   "devDependencies": {
     "should": "^7.0.1"

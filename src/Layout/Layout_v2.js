@@ -1,4 +1,4 @@
-import DrawComponent from '../DrawComponent/DrawComponent.js'
+import DrawComponent from '../DrawComponent/DrawComponentImpl/DrawComponent.js'
 
 import ComponentFactory from '../DrawComponent/Factory.js'
 

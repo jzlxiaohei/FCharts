@@ -19,6 +19,10 @@ const Constant = {
         CANDLE:'candle',
         AREA:'area',
         BAR:'bar'
+    },
+    YAxisType:{
+        NORMAL:'normal',
+        SYMMETRY:'symmetry'
     }
 }
 

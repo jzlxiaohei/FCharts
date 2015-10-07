@@ -1,9 +1,9 @@
-import CandlePainter from './CandlePainter.js'
-import AreaPainter from './AreaPainter.js'
-import LinePainter from './LinePainter.js'
-import XGridPainter from './XGridPainter.js'
-import YGridPainter from './YGridPainter.js'
-import BarPainter from './BarPainter.js'
+import CandlePainter from './PainterImpl/CandlePainter.js'
+import AreaPainter from './PainterImpl/AreaPainter.js'
+import LinePainter from './PainterImpl/LinePainter.js'
+import XGridPainter from './PainterImpl/XGridPainter.js'
+import YGridPainter from './PainterImpl/YGridPainter.js'
+import BarPainter from './PainterImpl/BarPainter.js'
 
 
 import Constant from '../Constant/Constant.js'

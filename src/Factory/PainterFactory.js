@@ -1,11 +1,11 @@
 //deprecated!!!
 
-import CandlePainter from '../Painter/CandlePainter.js'
-import AreaPainter from '../Painter/AreaPainter.js'
-import LinePainter from '../Painter/LinePainter.js'
-import XGridPainter from '../Painter/XGridPainter.js'
-import YGridPainter from '../Painter/YGridPainter.js'
-import BarPainter from '../Painter/BarPainter.js'
+import CandlePainter from '../Painter/PainterImpl/CandlePainter.js'
+import AreaPainter from '../Painter/PainterImpl/AreaPainter.js'
+import LinePainter from '../Painter/PainterImpl/LinePainter.js'
+import XGridPainter from '../Painter/PainterImpl/XGridPainter.js'
+import YGridPainter from '../Painter/PainterImpl/YGridPainter.js'
+import BarPainter from '../Painter/PainterImpl/BarPainter.js'
 
 import Constant from '../Constant/Constant.js'
 import Utils from '../Utils/Utils.js'
