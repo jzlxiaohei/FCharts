@@ -19,6 +19,10 @@ class LineDrawComponent extends BaseDrawComponent{
         var yAxis = this.yBridge.getYAxis(),
             xAxis = this.xBridge.getXAxis();
 
+        const gap = this.xBridge.getGap(),
+            itemWidth = this.xBridge.getItemWidth()
+
+
         var y0 = yAxis[0]
         if(typeof y0 =='object'){
             yAxis = yAxis.map(item=>item[this.pickedProp])
@@ -29,6 +33,10 @@ class LineDrawComponent extends BaseDrawComponent{
             .setXAxis(xAxis)
             .setYAxis(yAxis)
             .setStyle(this.style.line)
+            .setStyle({
+                gap,
+                itemWidth
+            })
             .render()
     }
 }

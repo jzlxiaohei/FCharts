@@ -3,8 +3,8 @@ import invariant from 'invariant'
 
 
 import PainterFactory from '../Painter/PainterFactory.js'
-import YBridgeFactory from '../Factory/YBridgeFactory.js'
-import XBridgeFactory from '../Factory/XBridgeFactory.js'
+import YBridgeFactory from '../DataBridge/YBridgeFactory.js'
+import XBridgeFactory from '../DataBridge/XBridgeFactory.js'
 
 import BuildDrawComponentByType from './BuildDrawComponentByType.js'
 import DefaultEvent from './DefaultEvent.js'
@@ -19,6 +19,7 @@ const getMousePos = Utils.Canvas.getMousePos;
 
 export default class Chart extends EventEmitter{
     constructor(options){
+        super();
 
         this.drawCanvas = options.drawCanvas;
         this.ctx = this.drawCanvas.getContext('2d')
@@ -28,7 +29,7 @@ export default class Chart extends EventEmitter{
         this.eventCanvas = options.eventCanvas;
 
         this.movable = options.movable || false;
-        this.scalable =  options.scalable || false;
+        this.zoomable =  options.zoomable || false;
         this.useDefalutOnMove = options.useDefalutOnMove||false
 
         this.componentList = {}
@@ -37,15 +38,16 @@ export default class Chart extends EventEmitter{
         this.style = options.style|| {}
         Utils.Common.merge(this.style,DefaultStyle)
 
-        //this.xAxisInited = false;
-        this.init();
+        this.isInit = false;
+        this._buildXAxis()
+            ._buildSeries()
+            ._buildEvent();
     }
 
 
     init(){
-        this._buildXAxis()
-            ._buildSeries()
-            ._buildEvent();
+        this.xBridge.init()
+        this.isInit = true;
     }
 
 
@@ -57,17 +59,12 @@ export default class Chart extends EventEmitter{
     //    return this;
     //}
 
-    //initXAxis(){
-    //    //this.xAxisInited = true;
-    //    this.xBridge.buildAxis();
-    //}
 
 
     /**
      *
      * @param dataObj:{x:xData,yKey1:yData1,yKey2:yData2....}
      */
-    *
     setData(dataObj){
         invariant(
             ('x' in dataObj),
@@ -92,9 +89,9 @@ export default class Chart extends EventEmitter{
     render(){
         //let [x,y,w,h] = this.canvasRect
         //this.ctx.clearRect(0,0,600,600)
-        //if(!this.xAxisInited){
-        //    this.initXAxis();
-        //}
+        if(!this.isInit){
+            this.init();
+        }
         this.ctx.fillStyle=  this.style.canvasColor
         this.ctx.fillRect(0,0,this.drawCanvas.width,this.drawCanvas.height)
         for(var i in this.componentList){
@@ -135,7 +132,7 @@ export default class Chart extends EventEmitter{
             console.warn('eventCanvas has not been set')
             return;
         }
-        bindEvent.call(this);
+        bindEvent.bind(this)();
     }
 
     _buildXAxis(){
@@ -145,7 +142,7 @@ export default class Chart extends EventEmitter{
         }else{
             this.xBridge = XBridgeFactory(Constant.XBridge.ITEM_WIDTH,xOptions)
         }
-        this.xBridge.buildAxis()
+        //this.xBridge.buildAxis()
         return this;
     }
 
@@ -162,6 +159,7 @@ export default class Chart extends EventEmitter{
 
     _addSeries(key,sOpt){
         let componentType = sOpt.type;
+        sOpt.xBridge = this.xBridge;
         this.componentList[key] = BuildDrawComponentByType(componentType,sOpt);
     }
 }
@@ -170,6 +168,7 @@ export default class Chart extends EventEmitter{
  *
  */
 function bindEvent(){
+    const eventCanvas = this.eventCanvas
     if(this.movable){
         this._dragging = false;
         this._lastX;
@@ -177,24 +176,25 @@ function bindEvent(){
 
         this.on('move',DefaultEvent.onMove)
 
-        const eventCanvas = this.eventCanvas
-        eventCanvas.onmousedown= e => {
+        eventCanvas.onmousedown= event => {
             this._dragging = true;
-            this._lastX = getMousePos(eventCanvas,e.x);
+            this._lastX = getMousePos(eventCanvas,event).x;
         }
-        eventCanvas.onmouseup = e =>{
+        eventCanvas.onmouseup = () =>{
             this._dragging = false;
         }
         eventCanvas.onmousemove = event=>{
-            const x = getMousePos(eventCanvas,e).x,
-                y = getMousePos(eventCanvas,e).y
+
+            const x = getMousePos(eventCanvas,event).x,
+                y = getMousePos(eventCanvas,event).y
             this.emit('move',{
                 event, x, y, eventCanvas,
                 __chart:this//传this不是很好，但是暂时无法确定move方法需要的东西。
             })
             this._curX = x;
+
             if(this._dragging){
-                this.setTranslation(x- (chart._lastX?chart._lastX:chart._curX) )
+                this.setTranslation(x- (this._lastX?this._lastX:this._curX) )
                 this.render()
             }
             this._lastX = this._curX
@@ -202,8 +202,8 @@ function bindEvent(){
     }
     if(this.zoomable){
         eventCanvas.onwheel = (event) => {
-            const x = getMousePos(eventCanvas,e).x,
-                y = getMousePos(eventCanvas,e).y
+            const x = getMousePos(eventCanvas,event).x,
+                y = getMousePos(eventCanvas,event).y
 
             var delta = event.wheelDelta // Webkit
                 || -event.deltaY

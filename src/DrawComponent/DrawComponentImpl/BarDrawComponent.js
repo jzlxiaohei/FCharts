@@ -14,9 +14,14 @@ class BarDrawComponent extends BaseDrawComponent{
         super(options)
         this.upBarPainter = PainterFactory(Constant.Painter.BAR);
         this.downBarPainter = PainterFactory(Constant.Painter.BAR);
-        this.style=options.style;
         this.candleData =  options.candleData || [];
         this.upDownSplitFn = options.upDownSplitFn || defaultSplitFn;
+    }
+
+    setData(dataObj){
+        this.data = dataObj.data;
+        this.candleData = dataObj.candleData
+        super.setData(this.data)
     }
 
     draw(){

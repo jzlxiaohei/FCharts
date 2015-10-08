@@ -66,7 +66,6 @@ class PainterBase{
         this.beforeDraw();
         this.draw()
 
-        this.setDefaultStyle();
         this.afterDraw();
     }
 

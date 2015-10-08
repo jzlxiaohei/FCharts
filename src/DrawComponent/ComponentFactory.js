@@ -2,9 +2,9 @@ import Constant from '../Constant/Constant.js'
 
 import Utils from '../Utils/Utils.js'
 
-import CandleComponent from './DrawComponentImpl/CandleComponent.js'
+import CandleComponent from './DrawComponentImpl/CandleDrawComponent.js'
 import LineComponent from './DrawComponentImpl/LineDrawComponent.js'
-import AreaComponent from './DrawComponentImpl/AreaComponent.js'
+import AreaComponent from './DrawComponentImpl/AreaDrawComponent.js'
 import BarComponent from './DrawComponentImpl/BarDrawComponent.js'
 
 var kvArr=[

@@ -19,7 +19,7 @@ function onMove(context){
     //eventCtx.fillText(chart.xBridge.getIndexByValue(x),10,10)
     eventCtx.stroke()
 
-    if(!info.outBound){
+    if(info!==undefined){
         var text = chart.tips(info);
         Utils.Canvas.wrapText(eventCtx,text,x,y,200,20)
     }

@@ -6,8 +6,8 @@
     <script src="./lib/jquery.js"></script>
     <script src="./lib/hsData.js"></script>
     <script src="./lib/async.js"></script>
-    <script src="/build/FCharts.js"></script>
-    <!--<script src="../build/FCharts.js"></script>-->
+    <!--<script src="/build/FCharts.js"></script>-->
+    <script src="../build/FCharts.js"></script>
     <style>
         html, body {
             width:  100%;
@@ -233,6 +233,9 @@
 
 
         var yValueData=[],barData=[]
+
+
+
         candle[prod_code].forEach(function(cd){
             yData.push( {
                 open:( cd[_m['open_px']] ) ,
@@ -246,10 +249,11 @@
         })
 
 
-        var beginDate=xData[0]
-        var endDate = new Date(beginDate);
-        endDate.setHours(15)
-        endDate.setMinutes(0)
+//        var beginDate=xData[0]
+//        beginDate.setMinutes(30)
+//        var endDate = new Date(beginDate);
+//        endDate.setHours(15)
+//        endDate.setMinutes(0)
 
 
         var defaultStyle = FCharts.DefaultStyle;
@@ -261,20 +265,22 @@
             movable: true,
             zoomable: true,
             xAxis: {
-                itemWidth: 4,
+                itemWidth: 6,
                 range: [0, 600],
                 data: xData,
-                gap: 2
+                gap: 6,
 //                beginDate:beginDate,
 //                endDate:endDate
             },
             tips:function(item){
                 var x = item.x, y = item['1m_candle'],
                 b=item['1m_bar']
+                var line = item['1m_line']
                 return x.getHours()+':'+ x.getMinutes() + '\n'+
                         'open:'+ y.open + '\n'+
                         'close:'+ y.close + '\n'+
-                        '成交量（手）'+ Math.round(b/100)
+                        '成交量（手）'+ Math.round(b/100)+'\n'+
+                        'line:'+line
             },
             series: {
                 '1m_bar':{
@@ -298,6 +304,11 @@
                     }],
                     gridColor: '#a9a9a9',
                     niceTick:true
+                },
+                '1m_line':{
+                    range: [20, 380],
+                    data: yData,
+                    type: 'line'
                 },
                 '1m_candle':{
                     range: [20, 380],
@@ -340,6 +351,39 @@
         })
 //        chart.render();
 
+
+        var index = 0;
+
+        function updateData() {
+            var cd = candle[prod_code][index]
+            yData.push({
+                open: ( cd[_m['open_px']] ),
+                high: cd[_m['high_px']],
+                low: cd[_m['low_px']],
+                close: cd[_m['close_px']]
+            })
+            yValueData.push(cd[_m['close_px']])
+            xData.push(dateStr2Obj(cd[_m['min_time']]))
+            barData.push(cd[_m['business_amount']])
+            index++;
+            if (index < candle[prod_code].length) {
+                setTimeout(updateData,50)
+            }
+            chart.setData({
+                x:xData,
+                '1m_candle':yData,
+                '1m_bar':{
+                    data:barData,
+                    candleData:yData
+                },
+                '1m_line':yValueData
+            })
+            chart.render();
+
+        }
+
+        updateData();
+
         function resizeCanvasUtil(htmlCanvas){
             htmlCanvas.width = window.innerWidth;
             htmlCanvas.height = window.innerHeight;
@@ -349,14 +393,30 @@
             resizeCanvasUtil(document.getElementById('canvas'))
             resizeCanvasUtil(document.getElementById('canvas-event'))
             chart.xBridge.range=[0,window.innerWidth]
+            chart.xBridge.init();
             var height = window.innerHeight;
-            chart.getComponent('1m_candle').yBridge.range = [0,height *.68]
+            chart.getComponent('1m_candle').yBridge.range = [20,height *.68]
+            chart.getComponent('1m_line').yBridge.range = [20,height *.68]
             chart.getComponent('1m_bar').yBridge.range = [height *.72,height]
             chart.render();
         }
 
         window.addEventListener('resize', resizeCanvas, false);
         resizeCanvas();
+
+
+//        function debug(){
+//            var l = chart.componentList['1m_line']
+//            var c = chart.componentList['1m_candle']
+//            var ly = l.yBridge.getYAxis()
+//            var cy = c.yBridge.getYAxis()
+//
+//            console.log(ly.length ==cy.length)
+//            for(var i =0;i<ly.length;i++){
+//                console.log(ly[i].close,cy[i].close)
+//            }
+//
+//        }
 
     </script>
 </body>

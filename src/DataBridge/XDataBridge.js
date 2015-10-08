@@ -40,6 +40,7 @@ import Utils from '../Utils/Utils.js'
  * */
 class XDataBridgeBase{
     constructor(options){
+        this._options = options;
         this.data = options.data || [];
         this.range = options.range //|| [0,0]
         this.gap = options.gap ||0;
@@ -48,14 +49,13 @@ class XDataBridgeBase{
         this.direction = options.direction || 'end'
         this.scaleRange = options.scaleRange || [0.01,5]
 
-        //计算出的x轴上的坐标，于data中的数据项一一对应。
-        this.xAxis = new Array(this.data.length);
+
 
         //缩放倍数
         this.scale = 1;
 
         //x轴的坐标是不是已经初始化。初始化后，有些设置是不需要的，比如`direction`的设置不能在生效。
-        this.isInit = false;
+        //this.isInit = false;
 
         //坐标轴上的tick数量。时间序列，暂时都是niceTick
         this.tickCount = options.tickCount || 10;
@@ -63,13 +63,17 @@ class XDataBridgeBase{
 
         //this.yDbList = {}
 
-        this.initItemWidth(options);
 
-        this._originItemWidth = this.itemWidth;
-        this.buildAxis();
     }
 
 
+    init(){
+        //this.isInit=true;
+        this.initItemWidth(this._options);
+        this._originItemWidth = this.itemWidth;
+        this._buildInitAxis()
+    }
+    
     /**
      * itemWidth的数值，由子类给出。itemWidth算出后，才能计算具体的x轴的坐标
      * itemWidth 一直为当前数据项所占宽度。放大缩小后，itemWidth会变化
@@ -111,12 +115,12 @@ class XDataBridgeBase{
 
     setData(data){
         this.data = data;
-        this.buildAxis();
+        this._buildInitAxis();
     }
 
     /**
      * @param value canvas上的x坐标，一般为range中一个值
-     * @returns 对于value的xAxis中的索引值。
+     * @returns number:对应value的xAxis中的索引值。
      *
      * @description 给定一个x，返回数据项中索引。比如用户鼠标移动，要根据x找到对应的数据项，给出tips
      *
@@ -124,7 +128,8 @@ class XDataBridgeBase{
     getIndexByValue(value){
         const xAxis = this.xAxis;
         if(xAxis.length == 0){
-            throw new Error('调用getIndexByValue时，xAxis不能为空')
+            //throw new Error('调用getIndexByValue时，xAxis不能为空')
+            return -1;
         }
         const space = this.itemWidth+this.gap;
         return Utils.Algorithms.binarySearch(xAxis,value,function(value,curElem){
@@ -144,17 +149,15 @@ class XDataBridgeBase{
      * @param fn 对x坐标的更新操作函数.传给fn的第一个参数是数据项，第二个是数据项索引
      * @private
      *
-     * @description 更新x坐标，并从新技术可视区。所有更新的操作，都应该使用此方法进行更新
+     * @description 更新x坐标，并从新计算可视区。所有更新的操作，都应该使用此方法进行更新
      */
     _updateXAxis(fn){
         const xAxis = this.xAxis;
         const [bRange,eRange] = this.range
         const space = this.itemWidth + this.gap;
-        let beginIdx=0,endIdx= xAxis.length;
-
+        let beginIdx=undefined,endIdx= undefined;
         for(let i = 0;i<xAxis.length;i++){
             xAxis[i] = fn(xAxis[i],i)
-
             if(beginIdx===undefined && xAxis[i] + space >= bRange){
                 beginIdx = i;
             }
@@ -162,6 +165,8 @@ class XDataBridgeBase{
                 endIdx = i;
             }
         }
+        beginIdx = beginIdx === undefined?0:beginIdx
+        endIdx = endIdx === undefined?xAxis.length:endIdx
 
         this.viewDomain=[beginIdx,endIdx];
     }
@@ -169,7 +174,7 @@ class XDataBridgeBase{
     /**
      * @description: 构造x坐标。
      */
-    buildAxis(){
+    _buildInitAxis(){
         const range = this.range,
             data = this.data,
             begin = range[0],
@@ -178,18 +183,22 @@ class XDataBridgeBase{
         let offset = 0
 
         //是否需要`右对齐`。
-        if(!this.isInit) {
-            this.isInit = true;
-            if (this.displayCount!==undefined && this.displayCount < data.length && this.direction == 'end') {
-                offset = (data.length - this.displayCount) * space
-            }
+        //if(!this.isInit) {
+        //    this.isInit = true;
+        if (this.displayCount!==undefined && this.displayCount < data.length && this.direction == 'end') {
+            offset = (data.length - this.displayCount) * space
         }
+        //}
+
+        //计算出的x轴上的坐标，于data中的数据项一一对应。
+        this.xAxis = new Array(this.data.length);
 
         const realOffset = begin-offset;
 
         this._updateXAxis(function(item,idx){
-            return space*idx + realOffset;
+            return space*idx + realOffset
         })
+
 
         return this;
     }
@@ -231,6 +240,10 @@ class XDataBridgeBase{
 
     getItemWidth(){
         return this.itemWidth;
+    }
+
+    getGap(){
+        return this.gap
     }
 
     getData(){
@@ -315,8 +328,9 @@ class XDataBridgeBase{
      * @param val: 平移的距离。
      */
     setTranslation(val){
+        //console.log(val)
         this._updateXAxis(function(item,idx){
-            return item + x;
+            return item + val;
         })
         return this;
     }

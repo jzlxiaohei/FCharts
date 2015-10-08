@@ -9,7 +9,8 @@ class CandlePainter extends PainterBase{
         var ctx = this.ctx;
         var xAxis = this.xAxis;
         var yAxis = this.yAxis;
-        var itemWidth = this.style.itemWidth|| 6;
+        const itemWidth = this.style.itemWidth|| 6,
+            gap = this.style.gap || 0
         for(var i = 0;i<yAxis.length;i++){
             var d = yAxis[i]
             var x1 = xAxis[i],
@@ -18,6 +19,12 @@ class CandlePainter extends PainterBase{
                 high = d.high,
                 low = d.low
 
+            //for(var j in d){
+            //    if(d[j]<20){
+            //        console.log(d[j])
+            //    }
+            //}
+            x1=x1+gap/2
             var x2 = x1 + itemWidth
             var midX = (x1+x2)/2
 
@@ -47,9 +54,6 @@ class CandlePainter extends PainterBase{
         }
     }
 
-    setDefaultStyle(){
-
-    }
 }
 
 export default CandlePainter;

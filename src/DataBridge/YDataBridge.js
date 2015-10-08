@@ -22,9 +22,13 @@ export class YDataBridge{
 
         this.linearScale = Utils.Math.LineScale();
 
-        this.buildAxis();
+        //this.isInit = false;
     }
 
+
+    init(){
+        this.buildAxis();
+    }
 
     cloneWithOptions(extraOptions){
         var originOptions = {
@@ -97,7 +101,7 @@ export class YDataBridge{
                 if(typeof y ==='object'){
                     var dataObj = {}
                     for(var i in y){
-                        dataObj[i] = rangeLen - ls.scale(y[i])
+                        dataObj[i] =  rangeLen - ls.scale(y[i])
                     }
                     return dataObj
                 }else{

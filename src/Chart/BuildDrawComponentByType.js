@@ -74,12 +74,12 @@ function buildBarDrawComponent(options){
 
 function buildCandleDrawComponent(options){
     checkOptions(options,CandleOptions,'CandleDrawComponent:')
-    return CpFactory(BAR,options)
+    return CpFactory(CANDLE,options)
 }
 
 function buildLineDrawComponent(options){
     checkOptions(options,LineOptions,'LineDrawComponent:')
-    return CpFactory(BAR,options)
+    return CpFactory(LINE,options)
 }
 
 function BuildDrawComponentByType(type,options){

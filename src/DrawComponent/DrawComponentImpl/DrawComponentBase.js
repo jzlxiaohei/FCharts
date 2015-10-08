@@ -2,7 +2,7 @@ import PainterFactory from '../../Painter/PainterFactory.js'
 import Constant from '../../Constant/Constant.js'
 import Utils from '../../Utils/Utils.js'
 import DefaultStyle from '../../DefaultStyle/DefaultStyle.js'
-
+import YBridgeFactory from '../../DataBridge/YBridgeFactory.js'
 
 var textFormatFn = function(t){
     return ''
@@ -16,7 +16,12 @@ class DrawComponentBase{
         Utils.Common.merge(this.style,DefaultStyle);//非overwrite
 
         this.xBridge = options.xBridge
-        this.yBridge = options.yBridge
+        this.yBridge = YBridgeFactory(options.bridgeType?options.bridgeType:Constant.YBridge.OHLC,{
+            range:options.range,
+            data:options.data,
+            tickCount:options.tickCount,
+            niceTick:options.niceTick
+        })
 
         this.xTextFormat = options.xTextFormat || textFormatFn
         this.labels = options.labels || [];
@@ -31,6 +36,10 @@ class DrawComponentBase{
         this.setYGridOn(this.yGridOn);
     }
 
+
+    setData(data){
+        this.yBridge.setData(data)
+    }
 
     setYBridge(yBridge){
         this.yBridge = yBridge

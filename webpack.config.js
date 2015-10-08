@@ -4,7 +4,7 @@ var path = require('path')
 module.exports = {
     cache:true,
     entry:{
-        FCharts:'./src/index.js'
+        FCharts:['./src/index.js']
     },
     output:{
         path:path.join(__dirname,'build'),

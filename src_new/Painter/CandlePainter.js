@@ -47,9 +47,6 @@ class CandlePainter extends PainterBase{
         }
     }
 
-    setDefaultStyle(){
-
-    }
 }
 
 export default CandlePainter;
