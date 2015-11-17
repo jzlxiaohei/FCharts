@@ -6,9 +6,7 @@
     "test": "mocha test/**/*.js --compilers js:babel/register",
     "build:umd": "webpack src/index.js dist/FCharts.js --config webpack.config.development.js",
     "build:umd:min": "webpack src/index.js dist/FCharts.min.js --config webpack.config.production.js",
-    "build:extends:umd": "webpack src/index.js dist/FCharts.extends.js --config webpack.config.development.js",
-    "build:extends:umd:min": "webpack src/index.js dist/FCharts.extends.min.js --config webpack.config.production.js",
-    "build":"npm run build:umd && npm run build:umd:min && npm run build:extends:umd && npm run build:extends:umd:min"
+    "build":"npm run build:umd && npm run build:umd:min"
   },
   "author": "zilong",
   "license": "MIT",

@@ -9,7 +9,8 @@
             padding: 0;
         }
     </style>
-    <script src="/build/ChartExtends.js"></script>
+    <script src="/dist/FCharts.js.js"></script>
+    <script src="/dist/FCharts.extends.js"></script>
 
 </head>
 <body style="padding: 0 10px;">
@@ -21,7 +22,10 @@
 
 
 <script>
-    var chart = new ChartExtends();
+    var chart = new ChartExtends({
+        FCharts:FCharts,
+
+    });
     var dStyle = chart.FCharts.DefaultStyle
     dStyle.canvasColor='#242424'
     chart.HsDataFactoryList.configTokenServer({

@@ -1,6 +1,6 @@
 import TrendCreator from './TrendCreator.js'
 import KLineCreator from './KLineCreator.js'
-import HsDataFactoryList from 'hs-public'
+//import HsDataFactoryList from 'hs-public'
 //import _FCharts from '../src/index.js'
 
 //import _HsDataFactoryList from 'hs-public'

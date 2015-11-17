@@ -8,7 +8,7 @@ module.exports = {
     ]
   },
   output: {
-    library: 'Redux',
+    library: 'FCharts',
     libraryTarget: 'umd'
   },
   resolve: {

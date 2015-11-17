@@ -13,7 +13,7 @@ export default class TrendCreator{
         this.canvasOptions = options.canvasOptions||{};
         this.chartOptions = options.chartOptions||{};
         this.hsCode = this.hsReqData['hsCode'];
-        this.onComponentInit = options.onComponentInit
+        this.onAfterRender = options.onAfterRender
         this._init();
     }
 
@@ -64,14 +64,16 @@ export default class TrendCreator{
                 fields:'last_px,avg_px,business_amount'
             },{loop:true}).onDataReady(e=>{
                 this._drawReal(chart,e,hsCode,preclose)
+
+                if(typeof this.onAfterRender =='function'){
+                    this.onAfterRender({
+                        hsClient,
+                        chart
+                    })
+                }
             }).init()
 
-            if(typeof this.onComponentInit =='function'){
-                this.onComponentInit({
-                    hsClient,
-                    chart
-                })
-            }
+
         }).init()
 
         return{
@@ -130,9 +132,9 @@ export default class TrendCreator{
             canvasHeight,
             preclose
             } = options
-
+        const chartOptions = this.chartOptions
         const FCharts = this.FCharts;
-        const chart = new FCharts.Chart({
+        let defaultOptions = {
             ctx: document.getElementById(canvasId).getContext('2d'),
             drawCanvas: document.getElementById(canvasId),
             eventCanvas: document.getElementById(canvasEventId),
@@ -252,10 +254,10 @@ export default class TrendCreator{
                 }
 
             }
-        })
+        }
 
-
-        return chart;
+        const finalOptions = utils.deepmerge(defaultOptions, chartOptions)
+        return new FCharts.Chart(finalOptions);
     }
 }
 
