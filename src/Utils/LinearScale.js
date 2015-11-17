@@ -2,7 +2,7 @@ import Utils from '../Utils/Utils.js';
 
 
 function niceNum(rangeLen,round){
-    var exponent = Math.floor(Math.log10(rangeLen)),
+    var exponent = Math.floor(Math.log(rangeLen)/Math.LN10),
         fraction = rangeLen / Math.pow(10, exponent)
         ,niceFraction;
 
@@ -69,7 +69,7 @@ export default class Linear {
         }
     }
 
-    _avgTick(count){
+    _avgTick(count,withBound=true){
         var [min,max] = this.domain;
 
         if(max<=min) return [];
@@ -77,14 +77,23 @@ export default class Linear {
         var step =  (max-min)/(count-1) ;
 
 
-        var start = Math.floor(min*step/step),
-            end =Math.ceil(max*step/step),
-            step = step
+        //var start = Math.floor(min*step/step),
+        //    end =Math.ceil(max*step/step),
+        //    step = step
 
         var ticks = []
-        for(var i = start;i<end;i+=step){
+
+        //if(start != min){
+        //    ticks.push(start)
+        //}
+
+        for(var i = min;i<=max;i+=step){
             ticks.push(i)
         }
+        //if(end!=max){
+        //    ticks.push(end);
+        //}
+
         return ticks;
     }
 

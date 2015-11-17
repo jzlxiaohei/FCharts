@@ -33,6 +33,8 @@ export default class Chart extends EventEmitter{
         this.useDefalutOnMove = options.useDefalutOnMove||false
 
         this.componentList = {}
+        this.avgLineComponentList={}//等componentList里的组件渲染完,在渲染
+        this.avgPriceComponentList={}
         this.tips = options.tips;
 
         this.style = options.style|| {}
@@ -75,29 +77,71 @@ export default class Chart extends EventEmitter{
             if(i=='x'){
                 this.xBridge.setData(dataObj.x)
             }else{
-                this.componentList[i].setData(dataObj[i])
+                if(i in this.componentList){
+                    this.componentList[i].setData(dataObj[i])
+                }else{
+                    this.avgPriceComponentList[i].setData(dataObj[i])
+                }
             }
+        }
+        for(let i in this.avgLineComponentList){
+            this.avgLineComponentList[i].setData()
         }
     }
 
+    addFirst(dataObj){
+        invariant(
+            ('x' in dataObj),
+            'param of chart.setData must be an Object and has property x'
+        )
 
+        for(let i in dataObj){
+            if(i=='x'){
+                this.xBridge.addFirst(dataObj.x)
+            }else{
+                if(i in this.componentList){
+                    this.componentList[i].addFirst(dataObj[i])
+                }else{
+                    this.avgPriceComponentList[i].addFirst(dataObj[i])
+                }
+            }
+        }
+        for(let i in this.avgLineComponentList){
+            this.avgLineComponentList[i].addFirst()
+        }
+    }
 
     getComponent(key){
         return this.componentList[key];
     }
 
+    drawBox(){
+        const x0 = 30,y0 = 20,
+            w = 470, h = this.drawCanvas.height-1;
+        this.ctx.beginPath()
+        this.ctx.strokeStyle='#fff'
+        this.ctx.rect(x0,y0,w,h)
+        this.ctx.stroke();
+    }
+
     render(){
-        //let [x,y,w,h] = this.canvasRect
-        //this.ctx.clearRect(0,0,600,600)
         if(!this.isInit){
             this.init();
         }
         this.ctx.fillStyle=  this.style.canvasColor
         this.ctx.fillRect(0,0,this.drawCanvas.width,this.drawCanvas.height)
-        for(var i in this.componentList){
+        for(let i in this.componentList){
             this.componentList[i].render();
         }
+        for(let i in this.avgPriceComponentList){
+            this.avgPriceComponentList[i].render();
+        }
+        for(let i in this.avgLineComponentList){
+            this.avgLineComponentList[i].render();
+        }
+        this.emit('afterRender',this);
     }
+
 
     setScale(scale,value){
         this.xBridge.setScale(scale,value);
@@ -160,8 +204,15 @@ export default class Chart extends EventEmitter{
     _addSeries(key,sOpt){
         let componentType = sOpt.type;
         sOpt.xBridge = this.xBridge;
-        this.componentList[key] = BuildDrawComponentByType(componentType,sOpt);
+        if(componentType === Constant.Component.AVG_LINE){
+            this.avgLineComponentList[key] = BuildDrawComponentByType(componentType,sOpt);
+        }else if( componentType === Constant.Component.AVG_PRICE){
+            this.avgPriceComponentList[key] = BuildDrawComponentByType(componentType,sOpt)
+        } else{
+            this.componentList[key] = BuildDrawComponentByType(componentType,sOpt);
+        }
     }
+
 }
 
 /**

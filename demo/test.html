@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="./lib/jquery.js"></script>
+    <script src="./lib/hsData.js"></script>
+    <script src="./lib/async.js"></script>
+    <!--<script src="/build/FCharts.js"></script>-->
+    <!--<script src="../build/FCharts.js"></script>-->
+    <script src="/build/FCharts.js"></script>
+    <style>
+        html, body {
+            width:  100%;
+            height: 100%;
+            margin: 0px;
+        }
+    </style>
+</head>
+<body>
+
+<div>
+    <canvas id="canvas" width="800" height="600"  style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
+    <canvas id="canvas-event"  width="800" height="600" style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
+</div>
+
+<script>
+
+
+
+
+    var start_date = new Date();
+    var parseDateToFormat = function(d){
+        var year = d.getFullYear()
+        var month = d.getMonth()+1
+        var day = d.getDate();
+        var hour =d.getHours();
+        var minute =d.getMinutes();
+
+        return {
+            year:year,
+            month:month<10 ?'0'+month : month,
+            day:day<10? '0'+day : day,
+            hour:hour<10? '0'+hour :hour,
+            minute: minute<10?'0'+minute : minute
+        }
+    }
+
+    var dateStr2Obj=function(str){
+        //201508130932
+        str = str+''
+        var year = +str.substring(0,4),
+                mouth = +str.substring(4,6),
+                day = +str.substring(6,8),
+                hour = +str.substring(8,10),
+                minute = +str.substring(10,12)
+
+
+        return new Date(year,mouth-1,day,hour,minute)
+    }
+
+    var sd_obj = parseDateToFormat(start_date);
+    function keyValueInvert(kvObj){
+        var vkObj={}
+        for(var i in kvObj){
+            vkObj[kvObj[i]] = i;
+        }
+        return vkObj;
+    }
+
+    //        function getMousePos(canvas, evt) {
+    //            var rect = canvas.getBoundingClientRect();
+    //            return {
+    //                x: evt.clientX - rect.left,
+    //                y: evt.clientY - rect.top
+    //            };
+    //        }
+</script>
+
+<script>
+
+    /*
+     var prod_code='600570.SS'
+     async.parallel({
+     preClose: function (cb) {
+     var real = new HsDataFactoryList.real({
+     en_prod_code: prod_code,
+     fields: 'preclose_px'
+     }).onDataReady(function (e) {
+     var _m = keyValueInvert(e.data.snapshot.fields)
+     var preClose = e.data.snapshot[prod_code][_m['preclose_px']]
+     cb(null, preClose)
+     }).init()
+     },
+     candle: function (cb) {
+     var kline = new HsDataFactoryList.kline({
+     get_type: 'offset',
+     prod_code: prod_code,
+     candle_period: 1,
+     data_count:240
+     }).onDataReady(function (e) {
+     var candle = e.data.candle;
+     cb(null, candle)
+     }).init()
+     }
+     },
+     function (err, results) {
+     var candle = results.candle
+
+     var preClose = results.preClose;
+
+     var _m = keyValueInvert(candle.fields)
+
+
+     var yData = [],xData=[]
+     //                    candle['600570.SS'].forEach(function(cd){
+     //                            yData.push( {
+     //                                open: 100* ( cd[_m['open_px']]-preClose ) /preClose,
+     //                                high: 100* ( cd[_m['high_px']]-preClose ) /preClose,
+     //                                low:  100* ( cd[_m['low_px']] -preClose)/preClose,
+     //                                close: 100*( cd[_m['close_px']]-preClose)/preClose
+     //                            })
+     //                            xData.push(cd[_m['min_time']])
+     //
+     //                    })
+
+     var yValueData=[],barData=[]
+     candle[prod_code].forEach(function(cd){
+     yData.push( {
+     open_px:( cd[_m['open_px']] ) ,
+     high_px : cd[_m['high_px']]  ,
+     low_px :  cd[_m['low_px']]  ,
+     close_px: cd[_m['close_px']]
+     })
+     yValueData.push(cd[_m['close_px']])
+     //                        xData.push(cd[_m['min_time']])
+     xData.push(dateStr2Obj(cd[_m['min_time']]))
+     barData.push(cd[_m['business_amount']])
+     })
+
+
+     var chart = new FCharts.Chart({
+     ctx: document.getElementById('canvas').getContext('2d'),
+     eventCanvas: document.getElementById('canvas-event'),
+     canvasRect: [0, 0, 600, 600],
+     movable: true,
+     scalable: true,
+     xAxis: {
+     itemWidth: 6,
+     range: [0, 600],
+     data: xData,
+     gap: 2
+     },
+     tips:function(item){
+     var x = item.x,
+     y = item['1m_line'];
+     return x.getHours()+':'+ x.getMinutes() + '\n'+
+     'open:'+ y.open_px + '\n'+
+     'close:'+ y.close_px + '\n'
+     },
+     series: [{
+     range: [20, 380],
+     data: yData,
+     key: '1m_line',
+     type: 'candle',
+     //                            axisType:'symmetry',
+     //                            preClose:preClose,
+     //                            niceTick:true
+     ohlcNameMap: {
+     open: "open_px",
+     close: "close_px",
+     high: "high_px",
+     low: "low_px"
+     },
+     tickCount: 10,
+     niceTick:true,
+     gridColor: '#a9a9a9',
+     style: {
+     up: {},
+     down: {}
+     },
+     yGridOn:true,
+     xGridOn:true,
+     xTextFormat: function (item) {
+     return item.getHours() + '时:' + item.getMinutes() + '分';
+     },
+     yTextFormat: function (item) {
+     return item.toFixed(2)
+     }
+     },
+     //                            {
+     //                            range: [400, 600],
+     //                            data: yValueData,
+     //                            key: '1m_line_1',
+     //                            type: 'line',
+     //                            tickCount: 5,
+     //                            gridColor: '#a9a9a9'
+     //                        },
+     {
+     range:[400,600],
+     key:'1m_bar',
+     type:'bar',
+     data:barData,
+     yGridOn:true,
+     yGridLine:false,
+     tickCount:5,
+     yTextFormat: function (item) {
+     if(item>10000){
+     var num = (item/10000)>>0
+     return num+'万'
+     }
+     return item>>0
+     }
+     }]
+     })
+     chart.render();
+     window.chart = chart;
+     }
+     )
+     */
+</script>
+<script src="mockData2.js"></script>
+<script>
+
+    var prod_code='600570.SS'
+
+    var candle = mockData.data.candle
+
+
+    var _m = keyValueInvert(candle.fields)
+
+
+    var yData = [],xData=[]
+
+
+    var yValueData=[],barData=[]
+
+
+
+    candle[prod_code].forEach(function(cd){
+        yData.push( {
+            open:( cd[_m['open_px']] ) ,
+            high : cd[_m['high_px']]  ,
+            low :  cd[_m['low_px']]  ,
+            close: cd[_m['close_px']]
+        })
+        yValueData.push(cd[_m['close_px']])
+        xData.push(dateStr2Obj(cd[_m['min_time']]))
+        barData.push(cd[_m['business_amount']])
+    })
+
+
+    //        var beginDate=xData[0]
+    //        beginDate.setMinutes(30)
+    //        var endDate = new Date(beginDate);
+    //        endDate.setHours(15)
+    //        endDate.setMinutes(0)
+
+
+    var defaultStyle = FCharts.DefaultStyle;
+    defaultStyle.canvasColor='#242424'
+    var chart = new FCharts.Chart({
+        ctx: document.getElementById('canvas').getContext('2d'),
+        eventCanvas: document.getElementById('canvas-event'),
+        drawCanvas: document.getElementById('canvas'),
+        movable: true,
+        zoomable: true,
+        xAxis: {
+            itemWidth: 6,
+            range: [0, 600],
+            data: xData,
+            gap: 6,
+//                beginDate:beginDate,
+//                endDate:endDate
+        },
+        tips:function(item){
+            var x = item.x, y = item['1m_candle'],
+                    b=item['1m_bar']
+            var line = item['1m_line']
+            return x.getHours()+':'+ x.getMinutes() + '\n'+
+//                    'open:'+ y.open + '\n'+
+//                    'close:'+ y.close + '\n'+
+                    '成交量（手）'+ Math.round(b/100)+'\n'+
+                    'line:'+line
+        },
+        series: {
+            '1m_bar':{
+                range:[400,600],
+                type:'bar',
+                data:barData,
+                yGridOn:true,
+//                    yGridLine:false,
+                tickCount:5,
+                candleData:yData,
+                labels:[ {
+                    pos:'right',
+                    place:'inner',
+                    value:function(item){
+                        if(item>1000000){
+                            var num = Math.round(item/1000000)
+                            return num+'万手'
+                        }
+                        return ( Math.round(item/100) )+ '手'
+                    }
+                }],
+                gridColor: '#a9a9a9',
+                niceTick:true
+            },
+            '1m_line':{
+                range: [20, 380],
+                data: yData,
+                type: 'line'
+            }
+            /*
+             '1m_candle':{
+             range: [20, 380],
+             data: yData,
+             type: 'candle',
+             tickCount: 10,
+             niceTick:true,
+             gridColor: '#555',
+             style: {
+             up: {},
+             down: {}
+             },
+             yGridOn:true,
+             xGridOn:true,
+             labels:[{
+             pos: 'left',
+             top:5,
+             place:'inner',
+             value: function (i) {
+             return i.toFixed(2)
+             }
+             },{
+             pos: 'right',
+             place:'inner',
+             top:5,
+             value: function (i) {
+             return i.toFixed(3)
+             },
+             color:'red'//not used
+             }],
+             xTextFormat: function (item) {
+             return item.getHours() + '时:' + item.getMinutes() + '分';
+             }
+             //                    yTextFormat: function (item) {
+             //                        return item.toFixed(2)
+             //                    },
+             }*/
+        }
+    })
+    chart.render();
+
+
+    var index = 0;
+
+    function updateData() {
+        var cd = candle[prod_code][index]
+        yData.push({
+            open: ( cd[_m['open_px']] ),
+            high: cd[_m['high_px']],
+            low: cd[_m['low_px']],
+            close: cd[_m['close_px']]
+        })
+        yValueData.push(cd[_m['close_px']])
+        xData.push(dateStr2Obj(cd[_m['min_time']]))
+        barData.push(cd[_m['business_amount']])
+        index++;
+
+        chart.setData({
+            x:xData,
+            '1m_candle':yData,
+            '1m_bar':{
+                data:barData,
+                candleData:yData
+            },
+            '1m_line':yValueData
+        })
+        chart.render();
+        if (index < candle[prod_code].length) {
+            setTimeout(updateData,20)
+        }
+    }
+
+    //    updateData();
+
+    function resizeCanvasUtil(htmlCanvas){
+        htmlCanvas.width = window.innerWidth;
+        htmlCanvas.height = window.innerHeight;
+    }
+
+    //    function resizeCanvas(){
+    //        resizeCanvasUtil(document.getElementById('canvas'))
+    //        resizeCanvasUtil(document.getElementById('canvas-event'))
+    //        chart.xBridge.range=[0,window.innerWidth]
+    //        chart.xBridge.init();
+    //        var height = window.innerHeight;
+    ////        chart.getComponent('1m_candle').yBridge.range = [20,height *.68]
+    //        chart.getComponent('1m_line').yBridge.range = [20,height *.68]
+    //        chart.getComponent('1m_bar').yBridge.range = [height *.72,height]
+    //        chart.render();
+    //    }
+    //
+    //    window.addEventListener('resize', resizeCanvas, false);
+    //    resizeCanvas();
+
+
+    //        function debug(){
+    //            var l = chart.componentList['1m_line']
+    //            var c = chart.componentList['1m_candle']
+    //            var ly = l.yBridge.getYAxis()
+    //            var cy = c.yBridge.getYAxis()
+    //
+    //            console.log(ly.length ==cy.length)
+    //            for(var i =0;i<ly.length;i++){
+    //                console.log(ly[i].close,cy[i].close)
+    //            }
+    //
+    //        }
+
+    window.onerror = function (errorMsg, url, lineNumber) {
+        alert('Error: ' + errorMsg + ' Script: ' + url + ' Line: ' + lineNumber);
+    }
+</script>
+</body>
+</html>

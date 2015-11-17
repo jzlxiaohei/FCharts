@@ -21,9 +21,15 @@ function onMove(context){
 
     if(info!==undefined){
         var text = chart.tips(info);
-        Utils.Canvas.wrapText(eventCtx,text,x,y,200,20)
+        if(text){
+            eventCtx.save();
+            let xOffset = 0;
+            if(x>eventCanvas.width/2){eventCtx.textAlign='end',xOffset=-15}
+            Utils.Canvas.wrapText(eventCtx,text,x+xOffset,y,200,20)
+            eventCtx.restore();
+        }
+
     }
-    eventCtx.restore();
 }
 
 export default {

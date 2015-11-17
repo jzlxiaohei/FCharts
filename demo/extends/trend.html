@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        *{
+            margin:0;
+            padding: 0;
+        }
+    </style>
+    <script src="/build/ChartExtends.js"></script>
+    
+</head>
+<body style="padding: 0 10px;">
+
+    <div id="mount-dom" style="position: relative">
+
+    </div>
+    <script>
+        var chart = new ChartExtends();
+        var dStyle = chart.FCharts.DefaultStyle
+        dStyle.canvasColor='#242424'
+        chart.HsDataFactoryList.configTokenServer({
+            tokenUrl:'http://api.wallstreetcn.com/v2/itn/token/public'
+        })
+        chart.TrendCreator({
+            domId:'mount-dom',
+            hsReqData:{
+                hsCode:'600570.SS'
+            },
+            onComponentInit:function(comObj){
+                comObj.hsClient.stop();
+            }
+        })
+
+    </script>
+
+</body>
+</html>

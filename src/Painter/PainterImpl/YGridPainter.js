@@ -48,6 +48,7 @@ class YGridPainter extends PainterBase{
         var [xBegin,xEnd] = this.xRange
         //var fontHeight = 0;
         ctx.save();
+        ctx.beginPath()
         for(var i =0;i<this.yAxis.length;i++){
             var y = this.yAxis[i].rangeValue
             ctx.moveTo(xBegin,y)
@@ -93,10 +94,21 @@ class YGridPainter extends PainterBase{
             base = opt.base || xEnd
         }
         var valueFn = opt.value || Utils.Fn.identify
+        var styleFn = opt.style;
         var ctx = this.ctx;
         ctx.textAlign=textAlign;
-        for(var i =0;i<yList.length;i++){
+        for(let i =0;i<yList.length;i++){
             var y = yList[i]
+            //ctx.beginPath()
+            if(!styleFn){
+                ctx.fillStyle = this.style.tickLabelColor;
+            }else{
+                const style = styleFn(yText[i],yList[i]);
+                for(let p in style){
+                    ctx[p] = style[p]
+                }
+            }
+
             ctx.fillText(valueFn(yText[i]),base,y-top)
         }
     }

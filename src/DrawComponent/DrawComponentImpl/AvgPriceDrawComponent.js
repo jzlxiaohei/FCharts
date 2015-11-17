@@ -3,30 +3,40 @@ import BaseDrawComponent from './DrawComponentBase.js'
 import Constant from '../../Constant/Constant.js'
 import PainterFactory from '../../Painter/PainterFactory.js'
 
-//TODO defaultStyle
-
-class LineDrawComponent extends BaseDrawComponent{
+//均价线，用于分时图
+export default class AvgPriceDrawComponent extends BaseDrawComponent{
 
     constructor(options={}){
         super(options)
-        this.pickedProp = options.pickedProp || 'close'
         this.linePainter = PainterFactory(Constant.Painter.LINE);
-        //this.painters.push(this.linePainter)
-        //this.style=options.style.line;
+        this.data = options.data;
+        this.parentSeries = options.parentSeries;
+    }
+
+    setData(data){
+        this.data = data;
+    }
+
+    beforeDraw(){
+        //this.yBridge.setViewDomain(this.xBridge.getViewDomain());
+        this.ctx = this.chart.ctx;
     }
 
     draw(){
-        var yAxis = this.yBridge.getYAxis(),
-            xAxis = this.xBridge.getXAxis();
+        const xAxis = this.xBridge.getXAxis();
+
 
         const gap = this.xBridge.getGap(),
             itemWidth = this.xBridge.getItemWidth()
 
 
-        const y0 = yAxis[0]
-        if(typeof y0 =='object'){
-            yAxis = yAxis.map(item=>item[this.pickedProp])
-        }
+        const data = this.data;
+        const [beginIdx,endIdx] = this.xBridge.getViewDomain()
+
+        const yAxis =  this.chart.getComponent(this.parentSeries)
+                .getYBridge()
+                .interpolation(data.slice(beginIdx,endIdx))
+
 
         this.linePainter
             .setCtx(this.ctx)
@@ -40,5 +50,3 @@ class LineDrawComponent extends BaseDrawComponent{
             .render()
     }
 }
-
-export default LineDrawComponent

@@ -19,13 +19,28 @@ let DefaultStyle ={
         lineWidth:1,
         strokeStyle:'#666'
     },
+    avgLine_5:{
+            brushType:'stroke',
+            lineWidth:1,
+            strokeStyle:'yellow'
+    },
+    'avgLine_10':{
+        brushType:'stroke',
+        lineWidth:1,
+        strokeStyle:'blue'
+    },
+    'avgLine_20':{
+        brushType:'stroke',
+        lineWidth:1,
+        strokeStyle:'white'
+    },
     barUp:{
         fillStyle:upColor,
         brushType:'fill'
     },
     barDown:{
-        fillStyle:downColor,
-        brushType:'fill'
+        strokeStyle:downColor,
+        brushType:'stroke'
     },
     gridColor:'#666',
     tickLabelColor:'#a9a9a9',

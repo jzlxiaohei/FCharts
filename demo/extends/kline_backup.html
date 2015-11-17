@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        *{
+            margin:0;
+            padding: 0;
+        }
+    </style>
+    <script src="/build/ChartExtends.js"></script>
+
+</head>
+<body style="padding: 0 10px;">
+
+<div id="mount-dom" style="position: relative">
+    <canvas id="canvas" width="600" height="400" style="position: absolute;z-index: 0;top:0;left:0;"></canvas>
+    <canvas id="canvas-event" width="600" height="400" style="position: absolute;z-index:0;top:0;left:0;"></canvas>
+</div>
+<script>
+    function dateStr2Obj(str){
+        str = str+''
+        var year = +str.substring(0,4),
+                mouth = +str.substring(4,6),
+                day = +str.substring(6,8),
+                hour = +str.substring(8,10),
+                minute = +str.substring(10,12)
+        return new Date(year,mouth-1,day,hour,minute)
+    }
+    function keyValueInvert(kvObj){
+        var vkObj={}
+        for(var i in kvObj){
+            vkObj[kvObj[i]] = i;
+        }
+        return vkObj;
+    }
+</script>
+
+<script>
+    var chart = new ChartExtends();
+    var dStyle = chart.FCharts.DefaultStyle
+    dStyle.canvasColor='#242424'
+    chart.HsDataFactoryList.configTokenServer({
+        tokenUrl:'http://api.wallstreetcn.com/v2/itn/token/public'
+    })
+    var canvasId = 'canvas',
+            canvasEventId = 'canvas-event'
+
+    var kChart = new  chart.FCharts.Chart({
+        ctx: document.getElementById(canvasId).getContext('2d'),
+        drawCanvas: document.getElementById(canvasId),
+        eventCanvas: document.getElementById(canvasEventId),
+        xAxis:{
+            range:[0,600], data:[],
+            itemWidth:4,
+            gap:2
+        },
+        movable:true,
+        zoomable:true,
+        tips:function(item){
+            const x = item.x,
+                    y=item['candle'],
+                    b=item['bar'];
+            return x.toLocaleString()
+        },
+        series:{
+            'candle':{
+                range:[0,250],
+                type:'candle',
+                data:[],
+                yGridOn:true,
+                xGridOn:true,
+                tickCount:10,
+                niceTick:true,
+                labels:[{
+                    pos: 'left', top:2, place:'inner',
+                    value: function (i) {
+                        return (i).toFixed(2)
+                    }
+                }],
+                xTextFormat: function (item) {
+                    return (item.getMonth()+1) + '月' + item.getDate() + '日';
+                }
+            },
+            'bar':{
+                range:[250,400],
+                type:'bar',
+                data:[],
+                candleData:[],
+                tickCount:3,
+                labels:[ {
+                    pos:'right',
+                    place:'inner',
+                    value:function(item){
+                        if(item>1000000){
+                            var num = Math.round(item/1000000)
+                            return num+'万手'
+                        }
+                        return ( Math.round(item/100) )+ '手'
+                    }
+                }],
+                yGridOn:true,
+                dataMin:0
+            }
+        }
+
+    })
+
+
+    var client = chart.HsDataFactoryList['kline']({
+        get_type:'offset',
+        prod_code:'600570.SS',
+        candle_period:6,
+        data_count:10,
+        date:'20151008'
+    }).onDataReady(function(e){
+        console.log(e)
+//        kChart.render()
+        var candle = e.candle;
+        var _m = keyValueInvert(candle.fields);
+        var data = candle['600570.SS'];
+
+        var yData = [],xData=[],barData=[];
+        data.forEach(function(cd){
+            yData.push( {
+                open:( cd[_m['open_px']] ) ,
+                high : cd[_m['high_px']]  ,
+                low :  cd[_m['low_px']]  ,
+                close: cd[_m['close_px']]
+            })
+            xData.push(dateStr2Obj(cd[_m['min_time']]))
+            barData.push(cd[_m['business_amount']])
+        })
+
+        kChart.setData({
+            x:xData,
+            'candle':yData,
+            'bar':{
+                data:barData,
+                candleData:yData
+            }
+        })
+        kChart.render();
+    }).init()
+</script>
+
+</body>
+</html>

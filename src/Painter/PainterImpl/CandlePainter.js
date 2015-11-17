@@ -19,11 +19,7 @@ class CandlePainter extends PainterBase{
                 high = d.high,
                 low = d.low
 
-            //for(var j in d){
-            //    if(d[j]<20){
-            //        console.log(d[j])
-            //    }
-            //}
+
             x1=x1+gap/2
             var x2 = x1 + itemWidth
             var midX = (x1+x2)/2

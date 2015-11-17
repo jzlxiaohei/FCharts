@@ -19,6 +19,9 @@ export class YDataBridge{
         this.yAxis = new Array(this.data.length);
         this.tickCount = options.tickCount;
         this.niceTick = options.niceTick || false;
+        this.dataMin = options.dataMin
+        this.dataMax = options.dataMax
+
 
         this.linearScale = Utils.Math.LineScale();
 
@@ -30,6 +33,7 @@ export class YDataBridge{
         this.buildAxis();
     }
 
+    /*
     cloneWithOptions(extraOptions){
         var originOptions = {
             axisType:this.axisType,
@@ -38,11 +42,22 @@ export class YDataBridge{
         var options = Utils.Common.merge(originOptions,extraOptions,true)
         return new YDataBridge(options)
     }
+    */
+
+    addFirst(arr){
+        if(!Utils.Type.isArray(arr)){arr=[arr]}
+        for(let i = arr.length-1;i>=0;i--){
+            this.data.unshift(arr[i])
+        }
+        this.buildAxis();
+        return this;
+    }
 
     setData(data){
         this.data=data;
         this.buildAxis();
     }
+
 
 
     /**
@@ -58,7 +73,7 @@ export class YDataBridge{
         var data = this.data;
         //数据项为数值和对象两种情况
         if(typeof data[0] === 'object'){
-            for(var i = beginIdx;i<endIdx;i++){
+            for(let i = beginIdx;i<endIdx;i++){
                 var dataItem = data[i]
                 var localMax = dataItem['high'] ,
                     localMin = dataItem ['low']
@@ -66,12 +81,15 @@ export class YDataBridge{
                 if(localMin < min){min = localMin}
             }
         }else{
-            for(var i = beginIdx;i<endIdx;i++){
+            for(let i = beginIdx;i<endIdx;i++){
                 var dataValue = data[i]
                 if(dataValue > max){max = dataValue;}
                 if(dataValue < min){min = dataValue}
             }
         }
+
+        if(this.dataMax!==undefined){max = this.dataMax}
+        if(this.dataMin!==undefined){min = this.dataMin}
 
         //axisType为对称时
         if(this.axisType===Constant.YAxisType.SYMMETRY){
@@ -92,25 +110,32 @@ export class YDataBridge{
         this._calcMaxMin()
         const data = this.data;
 
-        const rangeLen = this.range[1] + this.range[0]
-        const ls = this.linearScale;
 
         const [beginIdx,endIdx] = this.viewDomain;
 
-        this.yAxis = data.slice(beginIdx,endIdx).map( y =>{
-                if(typeof y ==='object'){
-                    var dataObj = {}
-                    for(var i in y){
-                        dataObj[i] =  rangeLen - ls.scale(y[i])
-                    }
-                    return dataObj
-                }else{
-                    return rangeLen - ls.scale(y);
-                }
-            }
-        )
+        this.yAxis = this.interpolation(data.slice(beginIdx,endIdx))
 
         return this;
+    }
+
+    interpolation(arr){
+        const rangeLen = this.range[1] + this.range[0]
+        const ls = this.linearScale;
+        return arr.map(y=>{
+            if(typeof y ==='object'){
+                var dataObj = {}
+                for(var i in y){
+                    dataObj[i] =  rangeLen - ls.scale(y[i])
+                }
+                return dataObj
+            }else{
+                return rangeLen - ls.scale(y);
+            }
+        })
+    }
+
+    setRange(){
+        this.range = range;
     }
 
     setViewDomain(viewDomain,forceCalculate){

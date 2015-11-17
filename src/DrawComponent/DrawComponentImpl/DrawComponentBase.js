@@ -12,20 +12,26 @@ class DrawComponentBase{
     constructor(options){
         this.chart = options.chart;
         this.style = options.style || {};
-
-        Utils.Common.merge(this.style,DefaultStyle);//非overwrite
+        this.range = Utils.Common.merge(this.style,DefaultStyle);//非overwrite
 
         this.xBridge = options.xBridge
-        this.yBridge = YBridgeFactory(options.bridgeType?options.bridgeType:Constant.YBridge.OHLC,{
-            range:options.range,
-            data:options.data,
-            tickCount:options.tickCount,
-            niceTick:options.niceTick
-        })
+
+        this.yBridge = options.yBridge
+            || YBridgeFactory(options.bridgeType?options.bridgeType:Constant.YBridge.OHLC,{
+                range:options.range,
+                data:options.data,
+                tickCount:options.tickCount,
+                niceTick:options.niceTick,
+                axisType:options.axisType,
+                dataMin :options.dataMin,
+                dataMax :options.dataMax
+            })
+
 
         this.xTextFormat = options.xTextFormat || textFormatFn
         this.labels = options.labels || [];
 
+        this.xTickList = options.xTickList;
         this.gridWidth = this.style.gridWidth
         this.gridColor = this.style.gridColor
         this.tickLabelColor =this.style.tickLabelColor
@@ -37,8 +43,16 @@ class DrawComponentBase{
     }
 
 
+    setRange(range){
+        this.yBridge.setRange(range)
+    }
+
     setData(data){
         this.yBridge.setData(data)
+    }
+
+    addFirst(data){
+        this.yBridge.addFirst(data);
     }
 
     setYBridge(yBridge){
@@ -53,7 +67,11 @@ class DrawComponentBase{
     setXGridOn(xGridOn){
         this.xGridOn = xGridOn;
         if(this.xGridOn && !this.xGridPainter){
-            this.xGridPainter = PainterFactory(Constant.Painter.X_GRID);
+            if(this.xTickList){
+                this.xGridPainter = PainterFactory(Constant.Painter.X_GRID_FIXED,{tickCount:this.xTickList})
+            } else{
+                this.xGridPainter = PainterFactory(Constant.Painter.X_GRID);
+            }
         }
         return this;
     }
@@ -87,8 +105,6 @@ class DrawComponentBase{
     }
 
     drawGrid(){
-
-
         var yRange = this.yBridge.getRange();
         var xRange = this.xBridge.getRange();
 
@@ -110,19 +126,34 @@ class DrawComponentBase{
         }
 
         if(this.xGridOn){
-            const xTicks = this.xBridge.getTicks();
-            this.xGridPainter
-                .setCtx(this.ctx)
-                .setXAxis(xTicks)
-                .setXRange(xRange)
-                .setYRange(yRange)
-                .setStyle({
-                    strokeStyle:this.gridColor,
-                    lineWidth:this.gridWidth,
-                    tickLabelColor:this.tickLabelColor
-                })
-                .setTextArray(xTicks.map(i=> this.xTextFormat(i.domainValue)))
-                .render()
+            //提供了xTickList
+            if(this.xTickList){
+                this.xTickList.y0 =  yRange[0]
+                this.xTickList.y1 =  yRange[1]
+                this.xGridPainter
+                    .setCtx(this.ctx)
+                    .setStyle({
+                        strokeStyle:this.gridColor,
+                        lineWidth:this.gridWidth,
+                        tickLabelColor:this.tickLabelColor
+                    })
+                    .setTickList(this.xTickList)
+                    .render();
+            }else{
+                const xTicks = this.xBridge.getTicks();
+                this.xGridPainter
+                    .setCtx(this.ctx)
+                    .setXAxis(xTicks)
+                    .setXRange(xRange)
+                    .setYRange(yRange)
+                    .setStyle({
+                        strokeStyle:this.gridColor,
+                        lineWidth:this.gridWidth,
+                        tickLabelColor:this.tickLabelColor
+                    })
+                    .setTextArray(xTicks.map(i=> this.xTextFormat(i.domainValue)))
+                    .render()
+            }
         }
 
     }

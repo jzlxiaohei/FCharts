@@ -5,6 +5,7 @@ const Constant = {
         AREA:'area',
         X_GRID:'xGrid',
         Y_GRID:'yGrid',
+        X_GRID_FIXED:'xGridFixed',
         BAR:'bar'
     },
     YBridge:{
@@ -18,7 +19,9 @@ const Constant = {
         LINE:'line',
         CANDLE:'candle',
         AREA:'area',
-        BAR:'bar'
+        BAR:'bar',
+        AVG_LINE:"avgLine",
+        AVG_PRICE:'avgPrice'
     },
     YAxisType:{
         NORMAL:'normal',

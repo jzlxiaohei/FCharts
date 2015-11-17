@@ -24,6 +24,12 @@ class BarDrawComponent extends BaseDrawComponent{
         super.setData(this.data)
     }
 
+    addFirst(dataObj){
+        this.candleData  = dataObj.candleData.concat(this.candleData)
+        this.data = dataObj.data.concat(this.data)
+        super.addFirst(dataObj.data)
+    }
+
     draw(){
         var yAxis = this.yBridge.getYAxis(),
             xAxis = this.xBridge.getXAxis();

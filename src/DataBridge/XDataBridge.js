@@ -54,24 +54,25 @@ class XDataBridgeBase{
         //缩放倍数
         this.scale = 1;
 
-        //x轴的坐标是不是已经初始化。初始化后，有些设置是不需要的，比如`direction`的设置不能在生效。
-        //this.isInit = false;
 
         //坐标轴上的tick数量。时间序列，暂时都是niceTick
         this.tickCount = options.tickCount || 10;
+
         //this.niceTick = options.niceTick || false;
-
-        //this.yDbList = {}
-
-
     }
 
 
+    /**
+     * 根据子类的initItemWidth,初始化x坐标。
+     * 根据设计：外部使用，必须主动调用。DataBridge这是相对底层的API,由更高层的类负责(如Chart负责延迟加载之类的功能)
+     *
+     * 调用后，scale
+     */
     init(){
-        //this.isInit=true;
+        const isInit=true;
         this.initItemWidth(this._options);
         this._originItemWidth = this.itemWidth;
-        this._buildInitAxis()
+        this._buildInitAxis(isInit)
     }
     
     /**
@@ -97,20 +98,20 @@ class XDataBridgeBase{
             this.xAxis.push(maxX+space*(i+1));
         }
         return this;
-    }
+    }*/
 
     addFirst(arr){
         if(!Utils.Type.isArray(arr)){arr=[arr]}
-
         let space = this.itemWidth + this.gap;
         let minX = this.xAxis[0];
-        for(let i = 0;i<arr.length;i++){
+        var len = arr.length
+        for(let i = len-1;i>=0;i--){
             this.data.unshift(arr[i])
-            this.xAxis.unshift(minX-space*(i+1))
+            this.xAxis.unshift(minX-space*(len-i))
         }
+        this._updateXAxis(i=>{return i});//更新可视区，因为坐标已经ok了，坐标不用更新，从算就好了
         return this;
     }
-    */
 
 
     setData(data){
@@ -127,8 +128,10 @@ class XDataBridgeBase{
      * */
     getIndexByValue(value){
         const xAxis = this.xAxis;
-        if(xAxis.length == 0){
+        //if(!xAxis){}//xAxis的初始化失败，一般是因为canvas已经存在，但是chart没有初始化完成，可以忽略
+        if(!xAxis || !xAxis.length){
             //throw new Error('调用getIndexByValue时，xAxis不能为空')
+            console.warn('xDataBridge.getIndexByValue: xAxis is empty')
             return -1;
         }
         const space = this.itemWidth+this.gap;
@@ -174,7 +177,7 @@ class XDataBridgeBase{
     /**
      * @description: 构造x坐标。
      */
-    _buildInitAxis(){
+    _buildInitAxis(isInit){
         const range = this.range,
             data = this.data,
             begin = range[0],
@@ -185,7 +188,11 @@ class XDataBridgeBase{
         //是否需要`右对齐`。
         //if(!this.isInit) {
         //    this.isInit = true;
-        if (this.displayCount!==undefined && this.displayCount < data.length && this.direction == 'end') {
+
+        if (isInit
+            && this.displayCount < data.length
+            && this.direction == 'end') {
+
             offset = (data.length - this.displayCount) * space
         }
         //}
@@ -194,11 +201,9 @@ class XDataBridgeBase{
         this.xAxis = new Array(this.data.length);
 
         const realOffset = begin-offset;
-
         this._updateXAxis(function(item,idx){
             return space*idx + realOffset
         })
-
 
         return this;
     }
@@ -209,7 +214,8 @@ class XDataBridgeBase{
      */
     getTicks() {
         const halfSpace = (this.itemWidth + this.gap)/2
-        const beginIdx =0, endIdx = this.data.length-1
+        //const beginIdx =0, endIdx = this.data.length-1
+        const [beginIdx,endIdx] = this.viewDomain;
         const data = this.data;
         const beginDate = this.beginDate || data[beginIdx],
             endDate = this.endDate || data[endIdx-1];
@@ -229,9 +235,13 @@ class XDataBridgeBase{
             let index = Utils.Algorithms.binarySearch(this.data,tick);
 
             if(index==-1)continue;
+            const rangeValue=this.xAxis[index]+halfSpace;
+            if(rangeValue > this.range[1] || rangeValue<this.range[0]){
+                continue;
+            }
             ticksWithoutOutBound.push({
                 domainValue:this.data[index],
-                rangeValue:this.xAxis[index]+halfSpace,
+                rangeValue:rangeValue,
                 index:index
             })
         }
@@ -267,7 +277,10 @@ class XDataBridgeBase{
     /**
      * @returns {Array.<T>} 可视区内的x轴坐标
      */
-    getXAxis(){
+    getXAxis(type=''){
+        if(type==='all'){
+            return this.xAxis;
+        }
         const [beginIdx,endIdx] = this.viewDomain
         return this.xAxis.slice(beginIdx,endIdx);
     }
@@ -328,7 +341,6 @@ class XDataBridgeBase{
      * @param val: 平移的距离。
      */
     setTranslation(val){
-        //console.log(val)
         this._updateXAxis(function(item,idx){
             return item + val;
         })
