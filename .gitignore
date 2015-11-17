@@ -32,6 +32,8 @@ node_modules
 #compiled js directory
 build
 
+dist
+
 .idea
 
 
