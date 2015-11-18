@@ -59,9 +59,9 @@ export default class KLineCreator {
     }
 
     _init() {
-        this.kChart = this._createChart()
+        this.klineChart = this._createChart()
         this._renderWithData(true)
-        this.kChart.on('afterRender', chart=> {
+        this.klineChart.on('afterRender', chart=> {
             if (this.noMoreData) {
                 return;
             }
@@ -120,7 +120,7 @@ export default class KLineCreator {
         }
 
         if(isInit){
-            this.kChart.setData({
+            this.klineChart.setData({
                 x: xData,
                 'candle': yData,
                 'bar': {
@@ -129,7 +129,7 @@ export default class KLineCreator {
                 }
             })
         }else{
-            this.kChart.addFirst({
+            this.klineChart.addFirst({
                 x: xData,
                 'candle': yData,
                 'bar': {
@@ -139,7 +139,7 @@ export default class KLineCreator {
             })
         }
         this.beginDate = data[0][_m['min_time']];
-        this.kChart.render();
+        this.klineChart.render();
 
     }
 

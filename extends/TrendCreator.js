@@ -14,6 +14,7 @@ export default class TrendCreator{
         this.chartOptions = options.chartOptions||{};
         this.hsCode = this.hsReqData['hsCode'];
         this.onAfterRender = options.onAfterRender
+        this.trendChart = null;
         this._init();
     }
 
@@ -51,19 +52,23 @@ export default class TrendCreator{
                 }
             }
             const preclose = snapshot[hsCode][precloseIndex];
-            chart = this._createChart({
-                canvasId,
-                canvasEventId,
-                canvasWidth,
-                canvasHeight,
-                preclose
-            })
+            if(!this.trendChart){
+                this.trendChart = this._createChart({
+                    canvasId,
+                    canvasEventId,
+                    canvasWidth,
+                    canvasHeight,
+                    preclose
+                })
+            }
+
+
 
             hsClient = this.HsDataFactoryList['trend']({
                 prod_code:hsCode,
                 fields:'last_px,avg_px,business_amount'
             },{loop:true}).onDataReady(e=>{
-                this._drawReal(chart,e,hsCode,preclose)
+                this._drawReal(this.trendChart,e,hsCode,preclose)
 
                 if(typeof this.onAfterRender =='function'){
                     this.onAfterRender({

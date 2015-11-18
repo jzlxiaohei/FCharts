@@ -23,6 +23,8 @@ export default class Chart extends EventEmitter{
 
         this.drawCanvas = options.drawCanvas;
         this.ctx = this.drawCanvas.getContext('2d')
+
+
         this.seriesOptions = options.series || [];
         this.xAxisOptions = options.xAxis;
 
@@ -40,10 +42,47 @@ export default class Chart extends EventEmitter{
         this.style = options.style|| {}
         Utils.Common.merge(this.style,DefaultStyle)
 
+        this._makeCanvasClear();
+
         this.isInit = false;
         this._buildXAxis()
             ._buildSeries()
             ._buildEvent();
+    }
+
+    _makeCanvasClear(){
+        //去掉反锯齿
+        //this.ctx.translate(-0.5, -0.5);
+        const ctx = this.ctx;
+        //高清屏处理
+        var devicePixelRatio = window.devicePixelRatio || 1,
+            backingStoreRatio = ctx.webkitBackingStorePixelRatio ||
+                ctx.mozBackingStorePixelRatio ||
+                ctx.msBackingStorePixelRatio ||
+                ctx.oBackingStorePixelRatio ||
+                ctx.backingStorePixelRatio || 1,
+            ratio = devicePixelRatio / backingStoreRatio;
+
+        this._scaleRatio(this.drawCanvas,ratio)
+            ._scaleRatio(this.eventCanvas,ratio)
+
+
+
+    }
+
+    _scaleRatio(canvas,ratio){
+        if(ratio < 2){return this}
+
+        const oldWidth = canvas.width;
+        const oldHeight = canvas.height;
+        canvas.width = oldWidth * ratio;
+        canvas.height = oldHeight * ratio;
+        canvas.style.width = oldWidth + 'px';
+        canvas.style.height = oldHeight + 'px';
+        const ctx = canvas.getContext('2d');
+        ctx.scale(ratio,ratio)
+        ctx.translate(-0.5, -0.5);
+        return this;
     }
 
 

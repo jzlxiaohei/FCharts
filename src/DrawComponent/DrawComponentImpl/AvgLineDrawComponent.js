@@ -57,7 +57,6 @@ export default class AvgLineDrawComponent extends BaseDrawComponent{
         const yBridge = this.yBridge;
         const data = yBridge.getData();
 
-
         for(let i = 0;i<data.length;i++){
             for(let avg in this.avgDataList){
                 const value = this._calcSingle(data,i,+avg);
@@ -67,7 +66,6 @@ export default class AvgLineDrawComponent extends BaseDrawComponent{
     }
 
     _calcSingle(data,index,avg){
-        //data = data.close || data;
         if(index<avg-1)return undefined;
         else{
             let sum = 0;
@@ -77,6 +75,15 @@ export default class AvgLineDrawComponent extends BaseDrawComponent{
             }
             return sum / avg;
         }
+
+        //var len = Math.min(index+1,avg);
+        //let sum = 0;
+        //for(let i=0;i<len;i++){
+        //    let dataItem = data[index-i]
+        //    sum += (dataItem.close||dataItem)
+        //}
+        //return sum / len;
+
     }
 
     _findIndexOfFirstNoUndefined(avgData,beginIndex,endIndex){

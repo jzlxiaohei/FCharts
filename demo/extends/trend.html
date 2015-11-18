@@ -9,8 +9,9 @@
             padding: 0;
         }
     </style>
-    <script src="/build/ChartExtends.js"></script>
-    
+    <script src="HsPublic.min.js"></script>
+    <script src="../../dist/FCharts.min.js"></script>
+
 </head>
 <body style="padding: 0 10px;">
 
@@ -18,21 +19,27 @@
 
     </div>
     <script>
-        var chart = new ChartExtends();
-        var dStyle = chart.FCharts.DefaultStyle
-        dStyle.canvasColor='#242424'
-        chart.HsDataFactoryList.configTokenServer({
+        HsDataFactoryList.configTokenServer({
             tokenUrl:'http://api.wallstreetcn.com/v2/itn/token/public'
         })
-        chart.TrendCreator({
+        var chart = new FCharts.ChartCreator(FCharts,HsDataFactoryList);
+        var dStyle = chart.FCharts.DefaultStyle
+        dStyle.canvasColor='#242424'
+        var cc = chart.TrendCreator({
             domId:'mount-dom',
             hsReqData:{
-                hsCode:'600570.SS'
+                hsCode:'600570.SS',
             },
-            onComponentInit:function(comObj){
+            onAfterRender:function(comObj){
                 comObj.hsClient.stop();
+            },
+            chartOptions:{
+                xAxis:{
+                    gap:2
+                }
             }
         })
+//        cc.trendChart.ctx.translate(0.5, 0.5);
 
     </script>
 

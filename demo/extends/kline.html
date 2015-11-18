@@ -9,8 +9,8 @@
             padding: 0;
         }
     </style>
-    <script src="/dist/FCharts.js.js"></script>
-    <script src="/dist/FCharts.extends.js"></script>
+    <script src="HsPublic.min.js"></script>
+    <script src="../../dist/FCharts.min.js"></script>
 
 </head>
 <body style="padding: 0 10px;">
@@ -22,15 +22,13 @@
 
 
 <script>
-    var chart = new ChartExtends({
-        FCharts:FCharts,
 
-    });
-    var dStyle = chart.FCharts.DefaultStyle
-    dStyle.canvasColor='#242424'
-    chart.HsDataFactoryList.configTokenServer({
+    HsDataFactoryList.configTokenServer({
         tokenUrl:'http://api.wallstreetcn.com/v2/itn/token/public'
     })
+    var chart = new FCharts.ChartCreator(FCharts,HsDataFactoryList);
+    var dStyle = chart.FCharts.DefaultStyle
+    dStyle.canvasColor='#242424'
     var cc = chart.KLineCreator({
         domId:'mount-dom',
         hsReqData:{
@@ -38,6 +36,7 @@
             candle_period:6
         }
     })
+//    cc.klineChart.ctx.translate(0.5, 0.5);
 
 </script>
 
