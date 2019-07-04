@@ -20,7 +20,7 @@ module.exports = {
                 test:/\.js?$/,
                 //exclude:'/node_modules/',
                 loader:'babel',
-                include:[path.resolve(__dirname, "src")],
+                include:[path.resolve(__dirname, "src"), path.resolve(__dirname, "extends")],
                 query: {}//{ optional: ['runtime']}
             }
         ]

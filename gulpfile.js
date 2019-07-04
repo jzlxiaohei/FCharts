@@ -51,7 +51,7 @@ gulp.task('dev-server',function(cb){
         console.log(eItem)
     }
     config.debug = true;
-    config.devtool = 'eval'
+    config.devtool = 'sourcemap'
     config.output.sourceMapFilename='[name].map'
 
 
