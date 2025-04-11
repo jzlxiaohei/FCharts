@@ -1,6 +1,9 @@
 #Finance Chart
 
-![](demo.mp4)
+
+[![Watch the demo video]](https://github.com/user-attachments/assets/65e30930-4979-421a-9086-df83789ba11d)
+
+
 
 # How to run
 
