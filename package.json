@@ -6,7 +6,7 @@
     "test": "mocha test/**/*.js --compilers js:babel/register",
     "build:umd": "webpack src/index.js dist/FCharts.js --config webpack.config.development.js",
     "build:umd:min": "webpack src/index.js dist/FCharts.min.js --config webpack.config.production.js",
-    "build":"npm run build:umd && npm run build:umd:min"
+    "build": "npm run build:umd && npm run build:umd:min"
   },
   "author": "zilong",
   "license": "MIT",
@@ -26,5 +26,10 @@
   },
   "devDependencies": {
     "should": "^7.0.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "graceful-fs": "^4.2.11"
+    }
   }
 }

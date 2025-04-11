@@ -1,5 +1,6 @@
 #Finance Chart
 
+![](demo.mp4)
 
 # How to run
 
