@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title></title>
     <script src="./lib/jquery.js"></script>
-    <script src="./lib/hsData.js"></script>
+    <!-- <script src="./lib/hsData.js"></script> -->
     <script src="./lib/async.js"></script>
     <script src="/build/FCharts.js"></script>
     <!--<script src="../build/FCharts.js"></script>-->
@@ -22,9 +22,8 @@
 <body>
 
     <div>
-        <canvas id="canvas" width="800" height="600" style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
-        <canvas id="canvas-event" width="800" height="600"
-            style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
+        <canvas id="canvas" style="position: absolute; left: 0; top: 0; z-index: 0;    "></canvas>
+        <canvas id="canvas-event" style="position: absolute; left: 0; top: 0; z-index: 1; "></canvas>
     </div>
 
     <script>
@@ -281,10 +280,11 @@
                     b = item['1m_bar']
                 var line = item['1m_line']
                 return x.getHours() + ':' + x.getMinutes() + '\n' +
-                    'open:' + y.open + '\n' +
-                    'close:' + y.close + '\n' +
-                    '成交量（手）' + Math.round(b / 100) + '\n' +
-                    'line:' + line
+                    'open: ' + y.open + '\n' +
+                    'close: ' + y.close + '\n' +
+                    'high: ' + y.high + '\n' +
+                    'low: ' + y.low + '\n' +
+                    'volume: ' + Math.round(b / 100) + '\n'
             },
             series: {
                 '1m_bar': {
@@ -326,7 +326,7 @@
                         down: {}
                     },
                     yGridOn: true,
-                    xGridOn: true,
+                    // xGridOn: true,
                     labels: [{
                         pos: 'left',
                         top: 5,
@@ -386,7 +386,7 @@
 
         }
 
-        updateData();
+        // updateData();
 
         function resizeCanvasUtil(htmlCanvas) {
             htmlCanvas.width = window.innerWidth;
